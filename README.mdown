@@ -13,4 +13,4 @@ You can download the executable at:
 Screenshot
 ==========
  
-[!(http://i54.tinypic.com/r2os9i.jpg)]
+[![](http://i54.tinypic.com/r2os9i.jpg)](http://i54.tinypic.com/r2os9i.jpg)
