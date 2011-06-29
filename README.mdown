@@ -1,0 +1,15 @@
+ZeoScope
+========
+
+ZeoScope is a biofeedback application based on Zeo Raw Data Library http://blog.myzeo.com/zeo-raw-data-library-free-your-mind/
+
+Downloads
+=========
+
+You can download the executable at:
+ * http://github.com/downloads/dancodru/ZeoScope/ZeoScope.zip
+ 
+Screenshot
+==========
+ 
+[![](http://i54.tinypic.com/r2os9i.jpg)]
