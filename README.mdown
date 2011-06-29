@@ -7,9 +7,10 @@ Downloads
 =========
 
 You can download the executable at:
- * http://github.com/downloads/dancodru/ZeoScope/ZeoScope.zip
+
+* http://github.com/downloads/dancodru/ZeoScope/ZeoScope.zip
  
 Screenshot
 ==========
  
-[![](http://i54.tinypic.com/r2os9i.jpg)]
+[!(http://i54.tinypic.com/r2os9i.jpg)]
