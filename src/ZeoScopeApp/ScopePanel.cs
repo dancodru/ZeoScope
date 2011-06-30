@@ -1,9 +1,10 @@
 ﻿namespace ZeoScope
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
-    using System.ComponentModel;
+    using System.IO;
     using System.Windows.Forms;
 
     using Microsoft.DirectX;
@@ -12,26 +13,10 @@
     using D3DFont = Microsoft.DirectX.Direct3D.Font;
     using WinFont = System.Drawing.Font;
 
-    class ScopePanel : Panel
+    internal class ScopePanel : Panel
     {
-        #region Event Declarations
-        [Category("Action")]
-        public event ScrollEventHandler ScrollScope;
-
-        [Category("Action")]
-        public event EventHandler ScrollValueChanged;
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Browsable(false)]
-        public event MouseEventHandler DeviceMouseMove;
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Browsable(false)]
-        public event MouseEventHandler DeviceMouseClick;
-        #endregion
-
         #region Privates
-        private int BorderMargin = 5;
+        private int borderMargin = 5;
 
         private HScrollBar scrollBar;
         private Panel splitterPanel;
@@ -60,16 +45,16 @@
             this.scrollBar = new HScrollBar();
             this.toolTip = new ToolTip();
 
-            this.Controls.Add(devicePanel);
+            this.Controls.Add(this.devicePanel);
             this.Controls.Add(this.scrollBar);
-            this.Controls.Add(splitterPanel);
+            this.Controls.Add(this.splitterPanel);
 
             this.devicePanel.Dock = DockStyle.Fill;
             this.devicePanel.Location = new System.Drawing.Point(0, 0);
-            this.devicePanel.MouseMove += new MouseEventHandler(devicePanel_MouseMove);
-            this.devicePanel.MouseClick += new MouseEventHandler(devicePanel_MouseClick);
-            this.devicePanel.MouseEnter += new EventHandler(ScopePanel_MouseEnter);
-            
+            this.devicePanel.MouseMove += new MouseEventHandler(this.DevicePanel_MouseMove);
+            this.devicePanel.MouseClick += new MouseEventHandler(this.DevicePanel_MouseClick);
+            this.devicePanel.MouseEnter += new EventHandler(this.ScopePanel_MouseEnter);
+
             this.splitterPanel.Dock = DockStyle.Bottom;
             this.splitterPanel.Size = new Size(this.Width, 3);
 
@@ -80,150 +65,34 @@
             this.scrollBar.LargeChange = 0;
             this.scrollBar.Maximum = 0;
             this.scrollBar.Size = new Size(this.Width, 17);
-            this.scrollBar.Scroll += new ScrollEventHandler(scrollBar_Scroll);
-            this.scrollBar.ValueChanged += new EventHandler(scrollBar_ValueChanged);
+            this.scrollBar.Scroll += new ScrollEventHandler(this.ScrollBar_Scroll);
+            this.scrollBar.ValueChanged += new EventHandler(this.ScrollBar_ValueChanged);
 
-            this.CreateDevice();
-        }
-
-        private void CreateDevice()
-        {
-            int adapterOrdinal = Manager.Adapters.Default.Adapter;
-
-            Caps caps = Manager.GetDeviceCaps(adapterOrdinal, DeviceType.Hardware);
-            CreateFlags createFlags;
-
-            if (caps.DeviceCaps.SupportsHardwareTransformAndLight)
+            try
             {
-                createFlags = CreateFlags.HardwareVertexProcessing;
+                this.CreateDevice();
             }
-            else
+            catch (FileNotFoundException ex)
             {
-                createFlags = CreateFlags.SoftwareVertexProcessing;
+                throw new ZeoException(ex, "Install DirectX Runtime http://www.microsoft.com/download/en/details.aspx?id=35");
             }
-
-            if (caps.DeviceCaps.SupportsPureDevice && createFlags == CreateFlags.HardwareVertexProcessing)
-            {
-                createFlags |= CreateFlags.PureDevice;
-            }
-
-            this.presentParams = new PresentParameters();
-            this.presentParams.Windowed = true;
-            this.presentParams.SwapEffect = SwapEffect.Discard;
-
-            this.device = new Device(adapterOrdinal, DeviceType.Hardware, devicePanel, createFlags, presentParams);
-
-            this.device.DeviceLost += new EventHandler(device_DeviceLost);
-
-            this.titleFont = new D3DFont(this.device, new WinFont("Courier New", 14, FontStyle.Bold));
-            this.labelFont = new D3DFont(this.device, new WinFont("Courier New", 10, FontStyle.Bold));
         }
         #endregion
 
-        #region Events
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            this.RenderDevice();
-        }
+        #region Event Declarations
+        [Category("Action")]
+        public event ScrollEventHandler ScrollScope;
 
-        protected override void OnResize(EventArgs eventargs)
-        {
-            this.scopeVerts = null;
-            this.deviceLost = true;
-            base.OnResize(eventargs);
-        }
+        [Category("Action")]
+        public event EventHandler ScrollValueChanged;
 
-        void ScopePanel_MouseEnter(object sender, EventArgs e)
-        {
-            if (this.scrollBar.Visible == true)
-            {
-                this.scrollBar.Focus();
-            }
-            else
-            {
-                this.Focus();
-            }
-        }
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Browsable(false)]
+        public event MouseEventHandler DeviceMouseMove;
 
-        void device_DeviceLost(object sender, EventArgs e)
-        {
-            Debug.WriteLine("ScopePanel.device_DeviceLost()");
-            this.scopeVerts = null;
-            this.deviceLost = true;
-        }
-
-        private void scrollBar_ValueChanged(object sender, EventArgs e)
-        {
-            if (this.ScrollValueChanged != null)
-            {
-                this.ScrollValueChanged(this, e);
-            }
-        }
-
-        private void scrollBar_Scroll(object sender, ScrollEventArgs e)
-        {
-            this.toolTip.SetToolTip(this.scrollBar, string.Format("{0}s", e.NewValue));
-
-            if (this.ScrollScope != null)
-            {
-                this.ScrollScope(this, e);
-            }
-        }
-
-        private void devicePanel_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (this.DeviceMouseMove != null)
-            {
-                this.DeviceMouseMove(this, e);
-            }
-
-            this.ScopeX = e.X - BorderMargin;
-            
-            if (this.ScopeData != null && this.ScopeX >= this.ScopeData.Length)
-            {
-                this.ScopeX = this.ScopeData.Length - 1;
-            }
-
-            if (this.ScopeX < 0)
-            {
-                this.ScopeX = 0;
-            }
-        }
-
-        void devicePanel_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (this.DeviceMouseClick != null)
-            {
-                this.DeviceMouseClick(this, e);
-            }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (disposing == true)
-            {
-                if (this.titleFont != null)
-                {
-                    this.titleFont.Dispose();
-                    this.titleFont = null;
-                }
-
-                if (this.labelFont != null)
-                {
-                    this.labelFont.Dispose();
-                    this.labelFont = null;
-                }
-
-                if (this.device != null)
-                {
-                    this.device.Dispose();
-                    this.device = null;
-                }
-            }
-        }
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Browsable(false)]
+        public event MouseEventHandler DeviceMouseClick;
         #endregion
 
         #region Properties
@@ -244,6 +113,7 @@
             {
                 return this.scrollBar.Visible;
             }
+
             set
             {
                 this.scrollBar.Visible = value;
@@ -259,6 +129,7 @@
             {
                 return this.splitterPanel.Visible;
             }
+
             set
             {
                 this.splitterPanel.Visible = value;
@@ -271,6 +142,7 @@
             {
                 return this.scrollBar.Value;
             }
+
             set
             {
                 if (this.scrollBar.Visible == false)
@@ -287,7 +159,7 @@
                 int max = this.scrollBar.Maximum + 1 - this.scrollBar.LargeChange;
                 max = max > 0 ? max : 0;
 
-                double mid =this.ScopeLength / 2 / this.SamplesPerSecond;
+                double mid = this.ScopeLength / 2 / this.SamplesPerSecond;
                 int p = (int)(value - mid);
                 int x = 0;
 
@@ -325,6 +197,7 @@
             {
                 return this.scrollBar.Maximum;
             }
+
             set
             {
                 // see MSDN for ScrollBar.Maximum
@@ -343,7 +216,7 @@
         {
             get
             {
-                int length = this.devicePanel.Width - BorderMargin - BorderMargin;
+                int length = this.devicePanel.Width - this.borderMargin - this.borderMargin;
                 return (length > 0) ? length : 0;
             }
         }
@@ -365,11 +238,149 @@
         public string[] LabelFormatStrings { get; set; }
 
         public int LabelSpacing { get; set; }
-        
+
         public string TimeString { get; set; }
         #endregion
 
+        #region Events
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            this.RenderDevice();
+        }
+
+        protected override void OnResize(EventArgs eventargs)
+        {
+            this.scopeVerts = null;
+            this.deviceLost = true;
+            base.OnResize(eventargs);
+        }
+
+        private void ScopePanel_MouseEnter(object sender, EventArgs e)
+        {
+            if (this.scrollBar.Visible == true)
+            {
+                this.scrollBar.Focus();
+            }
+            else
+            {
+                this.Focus();
+            }
+        }
+
+        private void Device_DeviceLost(object sender, EventArgs e)
+        {
+            this.scopeVerts = null;
+            this.deviceLost = true;
+        }
+
+        private void ScrollBar_ValueChanged(object sender, EventArgs e)
+        {
+            if (this.ScrollValueChanged != null)
+            {
+                this.ScrollValueChanged(this, e);
+            }
+        }
+
+        private void ScrollBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            this.toolTip.SetToolTip(this.scrollBar, string.Format("{0}s", e.NewValue));
+
+            if (this.ScrollScope != null)
+            {
+                this.ScrollScope(this, e);
+            }
+        }
+
+        private void DevicePanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (this.DeviceMouseMove != null)
+            {
+                this.DeviceMouseMove(this, e);
+            }
+
+            this.ScopeX = e.X - this.borderMargin;
+
+            if (this.ScopeData != null && this.ScopeX >= this.ScopeData.Length)
+            {
+                this.ScopeX = this.ScopeData.Length - 1;
+            }
+
+            if (this.ScopeX < 0)
+            {
+                this.ScopeX = 0;
+            }
+        }
+
+        private void DevicePanel_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (this.DeviceMouseClick != null)
+            {
+                this.DeviceMouseClick(this, e);
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (disposing == true)
+            {
+                if (this.titleFont != null)
+                {
+                    this.titleFont.Dispose();
+                    this.titleFont = null;
+                }
+
+                if (this.labelFont != null)
+                {
+                    this.labelFont.Dispose();
+                    this.labelFont = null;
+                }
+
+                if (this.device != null)
+                {
+                    this.device.Dispose();
+                    this.device = null;
+                }
+            }
+        }
+        #endregion
+
         #region Rendering
+        private void CreateDevice()
+        {
+            int adapterOrdinal = Manager.Adapters.Default.Adapter;
+
+            Caps caps = Manager.GetDeviceCaps(adapterOrdinal, DeviceType.Hardware);
+            CreateFlags createFlags;
+
+            if (caps.DeviceCaps.SupportsHardwareTransformAndLight)
+            {
+                createFlags = CreateFlags.HardwareVertexProcessing;
+            }
+            else
+            {
+                createFlags = CreateFlags.SoftwareVertexProcessing;
+            }
+
+            if (caps.DeviceCaps.SupportsPureDevice && createFlags == CreateFlags.HardwareVertexProcessing)
+            {
+                createFlags |= CreateFlags.PureDevice;
+            }
+
+            this.presentParams = new PresentParameters();
+            this.presentParams.Windowed = true;
+            this.presentParams.SwapEffect = SwapEffect.Discard;
+
+            this.device = new Device(adapterOrdinal, DeviceType.Hardware, this.devicePanel, createFlags, this.presentParams);
+
+            this.device.DeviceLost += new EventHandler(this.Device_DeviceLost);
+
+            this.titleFont = new D3DFont(this.device, new WinFont("Courier New", 14, FontStyle.Bold));
+            this.labelFont = new D3DFont(this.device, new WinFont("Courier New", 10, FontStyle.Bold));
+        }
+
         public void RenderDevice()
         {
             if (this.deviceLost == true)
@@ -393,7 +404,7 @@
                     {
                     }
                 }
-                
+
                 if (result == ResultCode.Success)
                 {
                     this.deviceLost = false;
@@ -417,18 +428,18 @@
             int maxX = this.devicePanel.Width;
             int maxY = this.devicePanel.Height;
 
-            device.Clear(ClearFlags.Target, backgroundColor, 1f, 0);
+            this.device.Clear(ClearFlags.Target, this.backgroundColor, 1f, 0);
 
             CustomVertex.TransformedColored[] verts = new CustomVertex.TransformedColored[5];
-            verts[0].Position = new Vector4(BorderMargin, BorderMargin, 0, 0);
+            verts[0].Position = new Vector4(this.borderMargin, this.borderMargin, 0, 0);
             verts[0].Color = Color.Black.ToArgb();
-            verts[1].Position = new Vector4(maxX - BorderMargin, BorderMargin, 0, 0);
+            verts[1].Position = new Vector4(maxX - this.borderMargin, this.borderMargin, 0, 0);
             verts[1].Color = Color.Black.ToArgb();
-            verts[2].Position = new Vector4(maxX - BorderMargin, maxY - BorderMargin, 0, 0);
+            verts[2].Position = new Vector4(maxX - this.borderMargin, maxY - this.borderMargin, 0, 0);
             verts[2].Color = Color.Black.ToArgb();
-            verts[3].Position = new Vector4(BorderMargin, maxY - BorderMargin, 0, 0);
+            verts[3].Position = new Vector4(this.borderMargin, maxY - this.borderMargin, 0, 0);
             verts[3].Color = Color.Black.ToArgb();
-            verts[4].Position = new Vector4(BorderMargin, BorderMargin, 0, 0);
+            verts[4].Position = new Vector4(this.borderMargin, this.borderMargin, 0, 0);
             verts[4].Color = Color.Black.ToArgb();
 
             this.device.BeginScene();
@@ -436,12 +447,12 @@
             this.device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 3, verts);
             this.device.EndScene();
 
-            int borderVertsLen = maxX - BorderMargin - BorderMargin + maxY - BorderMargin - BorderMargin;
+            int borderVertsLen = maxX - this.borderMargin - this.borderMargin + maxY - this.borderMargin - this.borderMargin;
 
             verts = new CustomVertex.TransformedColored[borderVertsLen];
 
-            int xlen = (maxX - BorderMargin - BorderMargin) / 2;
-            int ylen = (maxY - BorderMargin - BorderMargin) / 2;
+            int xlen = (maxX - this.borderMargin - this.borderMargin) / 2;
+            int ylen = (maxY - this.borderMargin - this.borderMargin) / 2;
             if (xlen <= 0 || ylen <= 0)
             {
                 return;
@@ -449,40 +460,43 @@
 
             for (int i = 0; i < xlen; i++)
             {
-                verts[i].Position = new Vector4(BorderMargin + i * 2, BorderMargin, 0, 0);
-                verts[i].Color = lineColor.ToArgb();
+                verts[i].Position = new Vector4(this.borderMargin + (i * 2), this.borderMargin, 0, 0);
+                verts[i].Color = this.lineColor.ToArgb();
             }
+
             for (int i = 0; i < xlen; i++)
             {
-                verts[i + xlen].Position = new Vector4(BorderMargin + i * 2, maxY - BorderMargin - 1, 0, 0);
-                verts[i + xlen].Color = lineColor.ToArgb();
-            }
-            for (int i = 0; i < ylen; i++)
-            {
-                verts[i + 2 * xlen].Position = new Vector4(BorderMargin, BorderMargin + i * 2, 0, 0);
-                verts[i + 2 * xlen].Color = lineColor.ToArgb();
-            }
-            for (int i = 0; i < ylen; i++)
-            {
-                verts[i + 2 * xlen + ylen].Position = new Vector4(maxX - BorderMargin, BorderMargin + i * 2, 0, 0);
-                verts[i + 2 * xlen + ylen].Color = lineColor.ToArgb();
+                verts[i + xlen].Position = new Vector4(this.borderMargin + (i * 2), maxY - this.borderMargin - 1, 0, 0);
+                verts[i + xlen].Color = this.lineColor.ToArgb();
             }
 
-            device.BeginScene();
-            device.VertexFormat = CustomVertex.TransformedColored.Format;
-            device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
-            device.EndScene();
+            for (int i = 0; i < ylen; i++)
+            {
+                verts[i + (2 * xlen)].Position = new Vector4(this.borderMargin, this.borderMargin + (i * 2), 0, 0);
+                verts[i + (2 * xlen)].Color = this.lineColor.ToArgb();
+            }
+
+            for (int i = 0; i < ylen; i++)
+            {
+                verts[i + (2 * xlen) + ylen].Position = new Vector4(maxX - this.borderMargin, this.borderMargin + (i * 2), 0, 0);
+                verts[i + (2 * xlen) + ylen].Color = this.lineColor.ToArgb();
+            }
+
+            this.device.BeginScene();
+            this.device.VertexFormat = CustomVertex.TransformedColored.Format;
+            this.device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
+            this.device.EndScene();
 
             // Horizontal lines
-            int horisontalGridLineLendth = (maxX - BorderMargin - BorderMargin) / 2;
+            int horisontalGridLineLendth = (maxX - this.borderMargin - this.borderMargin) / 2;
 
-            int lineSpace = (maxY - BorderMargin - BorderMargin) / (this.HorizontalLinesCount + 1);
+            int lineSpace = (maxY - this.borderMargin - this.borderMargin) / (this.HorizontalLinesCount + 1);
             for (int j = 1; j <= this.HorizontalLinesCount; j++)
             {
                 verts = new CustomVertex.TransformedColored[horisontalGridLineLendth];
                 for (int i = 0; i < xlen; i++)
                 {
-                    verts[i].Position = new Vector4(BorderMargin + i * 2, lineSpace * j + BorderMargin, 0, 0);
+                    verts[i].Position = new Vector4(this.borderMargin + (i * 2), (lineSpace * j) + this.borderMargin, 0, 0);
                     if (this.HorizontalLinesCount > 1 && this.HorizontalLinesCount % 2 == 1 &&
                         j == (this.HorizontalLinesCount + 1) / 2)
                     {
@@ -490,74 +504,74 @@
                     }
                     else
                     {
-                        verts[i].Color = lineColor.ToArgb();
+                        verts[i].Color = this.lineColor.ToArgb();
                     }
                 }
 
-                device.BeginScene();
-                device.VertexFormat = CustomVertex.TransformedColored.Format;
-                device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
-                device.EndScene();
+                this.device.BeginScene();
+                this.device.VertexFormat = CustomVertex.TransformedColored.Format;
+                this.device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
+                this.device.EndScene();
             }
         }
 
         private void DrawScope()
         {
-            if (ScopeData == null)
+            if (this.ScopeData == null)
             {
                 return;
             }
 
-            int maxX = devicePanel.Width;
-            int maxY = devicePanel.Height;
+            int maxX = this.devicePanel.Width;
+            int maxY = this.devicePanel.Height;
 
-            if (scopeVerts == null)
+            if (this.scopeVerts == null)
             {
-                scopeVertsLen = this.ScopeLength;
-                this.scrollBar.LargeChange = (int)(scopeVertsLen / this.SamplesPerSecond);
+                this.scopeVertsLen = this.ScopeLength;
+                this.scrollBar.LargeChange = (int)(this.scopeVertsLen / this.SamplesPerSecond);
                 this.scrollBar.SmallChange = (this.scrollBar.LargeChange > 10) ? this.scrollBar.LargeChange / 10 : 1;
 
-                scopeVerts = new CustomVertex.TransformedColored[this.NumberOfChannels][];
+                this.scopeVerts = new CustomVertex.TransformedColored[this.NumberOfChannels][];
                 for (int i = 0; i < this.NumberOfChannels; i++)
                 {
-                    scopeVerts[i] = new CustomVertex.TransformedColored[scopeVertsLen];
+                    this.scopeVerts[i] = new CustomVertex.TransformedColored[this.scopeVertsLen];
                 }
             }
 
             int len = this.CalculatePulseVerts();
 
-            device.BeginScene();
-            device.VertexFormat = CustomVertex.TransformedColored.Format;
+            this.device.BeginScene();
+            this.device.VertexFormat = CustomVertex.TransformedColored.Format;
             for (int i = this.NumberOfChannels - 1; i >= 0; i--)
             {
-                device.DrawUserPrimitives(PrimitiveType.LineStrip, len - 1, scopeVerts[i]);
+                this.device.DrawUserPrimitives(PrimitiveType.LineStrip, len - 1, this.scopeVerts[i]);
             }
 
-            device.EndScene();
+            this.device.EndScene();
 
             // Draw cursor line
-            int CursorMargin = 25;
-            int ylen = (maxY - CursorMargin - CursorMargin) / 2;
+            int cursorMargin = 25;
+            int ylen = (maxY - cursorMargin - cursorMargin) / 2;
             if (ylen > 0)
             {
                 CustomVertex.TransformedColored[] verts = new CustomVertex.TransformedColored[ylen];
                 for (int i = 0; i < ylen; i++)
                 {
-                    verts[i].Position = new Vector4(this.ScopeX + BorderMargin, CursorMargin + 4 + i * 2, 0, 0);
-                    verts[i].Color = lineColor.ToArgb();
+                    verts[i].Position = new Vector4(this.ScopeX + this.borderMargin, cursorMargin + 4 + (i * 2), 0, 0);
+                    verts[i].Color = this.lineColor.ToArgb();
                 }
 
-                device.BeginScene();
-                device.VertexFormat = CustomVertex.TransformedColored.Format;
-                device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
-                device.EndScene();
+                this.device.BeginScene();
+                this.device.VertexFormat = CustomVertex.TransformedColored.Format;
+                this.device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
+                this.device.EndScene();
             }
         }
 
         private int CalculatePulseVerts()
         {
-            float maxX = (float)devicePanel.Width;
-            float maxY = (float)devicePanel.Height;
+            float maxX = (float)this.devicePanel.Width;
+            float maxY = (float)this.devicePanel.Height;
 
             float[] scopeMod = new float[this.NumberOfChannels];
             float[] scopeZero = new float[this.NumberOfChannels];
@@ -568,14 +582,14 @@
                 scopeZero[k] = this.MinValueDisplay[k] + scopeMod[k];
             }
 
-            float mod = (maxY - BorderMargin - BorderMargin - 4) / 2;
-            float zero = mod + BorderMargin + 2;
+            float mod = (maxY - this.borderMargin - this.borderMargin - 4) / 2;
+            float zero = mod + this.borderMargin + 2;
 
             int len = (this.scopeVertsLen <= this.ScopeData.Length) ? this.scopeVertsLen : this.ScopeData.Length;
             int i = 0;
             for (i = 0; i < len; i++)
             {
-                float x = maxX - BorderMargin - scopeVertsLen + i;
+                float x = maxX - this.borderMargin - this.scopeVertsLen + i;
 
                 for (int k = 0; k < this.NumberOfChannels; k++)
                 {
@@ -583,8 +597,8 @@
                     if (this.ScopeData[i] != null)
                     {
                         y = zero - mod * ((this.ScopeData[i].Values[k] - scopeZero[k]) / scopeMod[k]);
-                        scopeVerts[k][i].Position = new Vector4(x, y, 0, 0);
-                        scopeVerts[k][i].Color = this.GraphColors[k].ToArgb();
+                        this.scopeVerts[k][i].Position = new Vector4(x, y, 0, 0);
+                        this.scopeVerts[k][i].Color = this.GraphColors[k].ToArgb();
                     }
                     else
                     {
@@ -593,7 +607,7 @@
                 }
             }
 
-        end: ;
+        end:;
             return i;
         }
 
@@ -628,7 +642,7 @@
                 {
                     if (this.ScopeData[this.ScopeX] != null)
                     {
-                        if(this.LabelFormatStrings[i].StartsWith("\t"))
+                        if (this.LabelFormatStrings[i].StartsWith("\t"))
                         {
                             textX += 50;
                         }

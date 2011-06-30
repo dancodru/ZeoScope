@@ -5,7 +5,7 @@
     using System.Runtime.InteropServices;
     using System.Text;
 
-    enum FTStatusCode : uint
+    internal enum FTStatusCode : uint
     {
         FT_OK,
         FT_INVALID_HANDLE,
@@ -30,7 +30,7 @@
         FT_DEVICE_LIST_NOT_READY,
     }
 
-    enum FtDevice
+    internal enum FtDevice
     {
         FT_DEVICE_BM,
         FT_DEVICE_AM,
@@ -42,7 +42,14 @@
         FT_DEVICE_4232H
     }
 
-    struct FTDeviceInfo
+    internal enum FTOpenByFlag : uint
+    {
+        FT_OPEN_BY_SERIAL_NUMBER = 1,
+        FT_OPEN_BY_DESCRIPTION = 2,
+        FT_OPEN_BY_LOCATION = 4
+    }
+
+    internal struct FTDeviceInfo
     {
         public uint Flags;
         public FtDevice Type;
@@ -53,7 +60,7 @@
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    struct FTDeviceInfoNode
+    internal struct FTDeviceInfoNode
     {
         public uint Flags;
         public FtDevice Type;
@@ -63,36 +70,11 @@
         public byte[] SerialNumber;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public byte[] Description;
-        public IntPtr ftHandle;
+        public IntPtr FTHandle;
     }
 
-    enum FTOpenByFlag : uint
+    internal class Ftdi
     {
-        FT_OPEN_BY_SERIAL_NUMBER = 1,
-        FT_OPEN_BY_DESCRIPTION = 2,
-        FT_OPEN_BY_LOCATION = 4
-    }
-
-    class Ftdi
-    {
-        [DllImport("ftd2xx.dll", ExactSpelling = true)]
-        private static extern FTStatusCode FT_CreateDeviceInfoList(
-            [Out] out uint lpdwNumDevs);
-
-        [DllImport("ftd2xx.dll", ExactSpelling = true)]
-        private static extern FTStatusCode FT_GetDeviceInfoList(
-            [In, Out] FTDeviceInfoNode[] pDest,
-            [In, Out] ref uint lpdwNumDevs);
-
-        [DllImport("ftd2xx.dll", ExactSpelling = true)]
-        private static extern FTStatusCode FT_OpenEx(string devstring, uint dwFlags, ref IntPtr ftHandle);
-
-        [DllImport("ftd2xx.dll", ExactSpelling = true)]
-        private static extern FTStatusCode FT_Close(IntPtr ftHandle);
-
-        [DllImport("ftd2xx.dll", ExactSpelling = true)]
-        private static extern FTStatusCode FT_GetComPortNumber(IntPtr ftHandle, out int dwComPortNumber);
-
         public static string[] GetComPortList()
         {
             List<string> comPorts = new List<string>();
@@ -140,7 +122,6 @@
                         }
                     }
                 }
-
             }
             catch (DllNotFoundException)
             {
@@ -149,6 +130,24 @@
             comPorts.Sort();
             return comPorts.ToArray();
         }
+
+        [DllImport("ftd2xx.dll", ExactSpelling = true)]
+        private static extern FTStatusCode FT_CreateDeviceInfoList(
+            [Out] out uint lpdwNumDevs);
+
+        [DllImport("ftd2xx.dll", ExactSpelling = true)]
+        private static extern FTStatusCode FT_GetDeviceInfoList(
+            [In, Out] FTDeviceInfoNode[] dest,
+            [In, Out] ref uint lpdwNumDevs);
+
+        [DllImport("ftd2xx.dll", ExactSpelling = true)]
+        private static extern FTStatusCode FT_OpenEx(string devstring, uint flags, ref IntPtr ftHandle);
+
+        [DllImport("ftd2xx.dll", ExactSpelling = true)]
+        private static extern FTStatusCode FT_Close(IntPtr ftHandle);
+
+        [DllImport("ftd2xx.dll", ExactSpelling = true)]
+        private static extern FTStatusCode FT_GetComPortNumber(IntPtr ftHandle, out int comPortNumber);
 
         private static string GetComPortNumber(string serialNumber)
         {
