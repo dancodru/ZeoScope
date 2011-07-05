@@ -284,7 +284,7 @@
 
         private void ScrollBar_Scroll(object sender, ScrollEventArgs e)
         {
-            this.toolTip.SetToolTip(this.scrollBar, string.Format("{0}s", e.NewValue));
+            this.toolTip.SetToolTip(this.scrollBar, this.TimeString);
 
             if (this.ScrollScope != null)
             {

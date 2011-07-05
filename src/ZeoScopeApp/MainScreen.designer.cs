@@ -75,6 +75,8 @@
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.eegLevelToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.settingsToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.freqScopePanel = new ZeoScope.ScopePanel();
             this.stageScopePanel = new ZeoScope.ScopePanel();
             this.eegScopePanel.SuspendLayout();
@@ -136,7 +138,9 @@
             this.toolStripLabel1,
             this.toolStripSeparator3,
             this.toolStripLabel3,
-            this.eegLevelToolStripComboBox});
+            this.eegLevelToolStripComboBox,
+            this.toolStripSeparator4,
+            this.settingsToolStripButton});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
             this.toolStrip.Name = "toolStrip";
             this.toolStrip.Size = new System.Drawing.Size(784, 25);
@@ -178,6 +182,7 @@
             this.comPortToolStripComboBox.Name = "comPortToolStripComboBox";
             this.comPortToolStripComboBox.Size = new System.Drawing.Size(75, 25);
             this.comPortToolStripComboBox.ToolTipText = "COM Port";
+            this.comPortToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.ComPortToolStripComboBox_SelectedIndexChanged);
             // 
             // toolStripSeparator1
             // 
@@ -209,6 +214,8 @@
             // 
             this.fileNameToolStripComboBox.AutoToolTip = true;
             this.fileNameToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
+            this.fileNameToolStripComboBox.Items.AddRange(new object[] {
+            "ZeoData"});
             this.fileNameToolStripComboBox.Name = "fileNameToolStripComboBox";
             this.fileNameToolStripComboBox.Size = new System.Drawing.Size(75, 25);
             this.fileNameToolStripComboBox.Text = "ZeoData";
@@ -247,6 +254,21 @@
             this.eegLevelToolStripComboBox.Size = new System.Drawing.Size(75, 25);
             this.eegLevelToolStripComboBox.ToolTipText = "EEG Level";
             this.eegLevelToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.EegLevelToolStripComboBox_SelectedIndexChanged);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // settingsToolStripButton
+            // 
+            this.settingsToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.settingsToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("settingsToolStripButton.Image")));
+            this.settingsToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.settingsToolStripButton.Name = "settingsToolStripButton";
+            this.settingsToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.settingsToolStripButton.Text = "Settings";
+            this.settingsToolStripButton.Click += new System.EventHandler(this.SettingsToolStripButton_Click);
             // 
             // freqScopePanel
             // 
@@ -319,7 +341,6 @@
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainScreen_FormClosed);
             this.Shown += new System.EventHandler(this.MainScreen_Shown);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainScreen_KeyPress);
             this.eegScopePanel.ResumeLayout(false);
             this.eegScopePanel.PerformLayout();
             this.toolStrip.ResumeLayout(false);
@@ -329,5 +350,8 @@
         }
 
         #endregion
+
+        private ToolStripSeparator toolStripSeparator4;
+        private ToolStripButton settingsToolStripButton;
     }
 }
