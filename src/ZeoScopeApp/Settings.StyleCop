@@ -209,6 +209,7 @@
       <AnalyzerSettings>
         <CollectionProperty Name="Hungarian">
           <Value>ft</Value>
+          <Value>mp</Value>
           <Value>rw</Value>
         </CollectionProperty>
       </AnalyzerSettings>

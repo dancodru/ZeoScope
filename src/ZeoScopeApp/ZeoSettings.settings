@@ -3,28 +3,28 @@
   <Profiles />
   <Settings>
     <Setting Name="LucidAlarmEnabled" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="ComPortSelectedIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="MP3FileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">BrownNoise10min.mp3</Value>
+    </Setting>
+    <Setting Name="AlarmCue" Type="System.String" Scope="User">
+      <Value Profile="(Default)">40R</Value>
+    </Setting>
+    <Setting Name="AlarmFromTime" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="LucidAlarmCue" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LucidAlarmFromTime" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LucidAlarmToTime" Type="System.String" Scope="User">
+    <Setting Name="AlarmToTime" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="EegLevelSelecteIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3</Value>
     </Setting>
-    <Setting Name="ZeoFileNames" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="FileNames" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ZeoData</Value>
     </Setting>
     <Setting Name="WindowMaximized" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -38,14 +38,17 @@
     <Setting Name="FreqPanelHeight" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">200</Value>
     </Setting>
-    <Setting Name="FadeIn" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">60</Value>
+    <Setting Name="AlarmFadeIn" Type="System.String" Scope="User">
+      <Value Profile="(Default)">01:30</Value>
     </Setting>
-    <Setting Name="FadeOut" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">30</Value>
+    <Setting Name="AlarmFadeOut" Type="System.String" Scope="User">
+      <Value Profile="(Default)">00:30</Value>
     </Setting>
-    <Setting Name="AlarmDuration" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">120</Value>
+    <Setting Name="AlarmDuration" Type="System.String" Scope="User">
+      <Value Profile="(Default)">02:00</Value>
+    </Setting>
+    <Setting Name="AlarmCues" Type="System.String" Scope="User">
+      <Value Profile="(Default)">40R|20R|20R;1L OR 20L;1R</Value>
     </Setting>
   </Settings>
 </SettingsFile>

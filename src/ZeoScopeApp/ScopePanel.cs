@@ -249,11 +249,50 @@
             this.RenderDevice();
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            base.OnPaintBackground(e);
+            this.RenderDevice();
+        }
+
         protected override void OnResize(EventArgs eventargs)
         {
+            base.OnResize(eventargs);
             this.scopeVerts = null;
             this.deviceLost = true;
-            base.OnResize(eventargs);
+        }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+            this.scopeVerts = null;
+            this.deviceLost = true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (disposing == true)
+            {
+                if (this.titleFont != null)
+                {
+                    this.titleFont.Dispose();
+                    this.titleFont = null;
+                }
+
+                if (this.labelFont != null)
+                {
+                    this.labelFont.Dispose();
+                    this.labelFont = null;
+                }
+
+                if (this.device != null)
+                {
+                    this.device.Dispose();
+                    this.device = null;
+                }
+            }
         }
 
         private void ScopePanel_MouseEnter(object sender, EventArgs e)
@@ -317,32 +356,6 @@
             if (this.DeviceMouseClick != null)
             {
                 this.DeviceMouseClick(this, e);
-            }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (disposing == true)
-            {
-                if (this.titleFont != null)
-                {
-                    this.titleFont.Dispose();
-                    this.titleFont = null;
-                }
-
-                if (this.labelFont != null)
-                {
-                    this.labelFont.Dispose();
-                    this.labelFont = null;
-                }
-
-                if (this.device != null)
-                {
-                    this.device.Dispose();
-                    this.device = null;
-                }
             }
         }
         #endregion
@@ -596,7 +609,7 @@
                     float y = zero;
                     if (this.ScopeData[i] != null)
                     {
-                        y = zero - mod * ((this.ScopeData[i].Values[k] - scopeZero[k]) / scopeMod[k]);
+                        y = zero - (mod * ((this.ScopeData[i].Values[k] - scopeZero[k]) / scopeMod[k]));
                         this.scopeVerts[k][i].Position = new Vector4(x, y, 0, 0);
                         this.scopeVerts[k][i].Color = this.GraphColors[k].ToArgb();
                     }

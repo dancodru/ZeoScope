@@ -11,6 +11,7 @@ namespace ZeoScope
     using System.Text;
     using System.Threading;
 
+    #region Enums and Helper Classes
     internal enum ZeoDataType
     {
         Event = 0x00,
@@ -23,6 +24,16 @@ namespace ZeoScope
         Impedance = 0x97,
         BadSignal = 0x9C,
         SleepStage = 0x9D,
+        Error = 0xFF,
+    }
+
+    /// <summary>
+    /// Additional DataTypes used by ZeoScope
+    /// </summary>
+    internal enum Z9DataType
+    {
+        SoundAlarmVolume = 0x00,
+        SoundAlarmEnabled = 0x01,
     }
 
     internal enum ZeoSleepStage
@@ -67,13 +78,18 @@ namespace ZeoScope
 
         public static readonly int FrequencyBinsLength = 7;
 
+        public ZeoMessage()
+        {
+            this.SoundAlarmVolume = -10000;
+        }
+
         public float[] Waveform { get; set; }
 
         public float? Impedance { get; set; }
 
         public ZeoEvent? Event { get; set; }
 
-        public uint ZeoTimestamp { get; set; }
+        public int ZeoTimestamp { get; set; }
 
         public bool? BadSignal { get; set; }
 
@@ -84,6 +100,8 @@ namespace ZeoScope
         public ZeoSleepStage? SleepStage { get; set; }
 
         public float Second { get; set; }
+
+        public int SoundAlarmVolume { get; set; }
 
         public override string ToString()
         {
@@ -134,20 +152,22 @@ namespace ZeoScope
             return stringBuilder.ToString().Trim();
         }
     }
+    #endregion
 
     internal class ZeoStream : IDisposable
     {
+        #region Fields
         public static readonly double SamplesPerSec = 128.0;
         public static readonly int SleepStageSeconds = 30;
 
         private static string versionFormat = "ZeoVersion: {0:00}.{1:00}.{2:0000}.{3:0000}";
 
         private static string[] supportedVersions = new string[] {
-            string.Empty 
-        }; // old version (no version string)
+            string.Empty, // old version (no version string)
+            "ZeoVersion: 00.09.0000.0000"
+        };
 
         private string fileName;
-        private bool isLiveStream;
 
         private byte[] buffer = new byte[512];
         private List<ZeoMessage> zeoMessages = new List<ZeoMessage>(100);
@@ -162,6 +182,10 @@ namespace ZeoScope
 
         private Stopwatch stopWatch = new Stopwatch();
 
+        private SoundAlarm soundAlarm;
+        #endregion
+
+        #region Constructor and Properties
         public ZeoStream(ManualResetEvent exitWorkerEvent)
         {
             this.exitWorkerEvent = exitWorkerEvent;
@@ -189,10 +213,70 @@ namespace ZeoScope
             }
         }
 
-        public bool LiveStream
+        public bool LiveStream { get; private set; }
+
+        public bool SoundAlarmEnabled { get; private set; }
+
+        #endregion
+
+        #region Public Methods
+        public void OpenLiveStream(string comPortName, string fileName, SoundAlarm soundAlarm)
         {
-            get { return this.isLiveStream; }
-            set { this.isLiveStream = value; }
+            Directory.CreateDirectory("ZeoData");
+
+            this.soundAlarm = soundAlarm;
+
+            this.LiveStream = true;
+            this.fileName = string.Format(@"ZeoData\{0}_{1}.zeo", fileName, DateTime.Now.ToString("yyyy-MM-dd_HHmmss"));
+            this.binFile = new FileStream(this.fileName, FileMode.CreateNew);
+            this.AddVersionString();
+
+            if (this.soundAlarm != null)
+            {
+                this.WriteZ9Message(new ZeoMessage(), Z9DataType.SoundAlarmEnabled);
+            }
+
+            this.serialPort = new SerialPort(comPortName, 38400, Parity.None, 8, StopBits.One);
+            this.serialPort.Open();
+            this.serialPort.DiscardInBuffer();
+
+            this.readThread = new Thread(new ThreadStart(this.ReadSerialStream));
+            this.readThread.Start();
+        }
+
+        public void OpenFileStream(string fileName)
+        {
+            this.fileName = fileName;
+
+            this.binFile = new FileStream(this.fileName, FileMode.Open);
+            this.CheckVersionString();
+
+            try
+            {
+                while (true)
+                {
+                    ZeoMessage zeoMessage = this.ReadMessage();
+                    if (zeoMessage != null)
+                    {
+                        this.zeoMessages.Add(zeoMessage);
+                        if (zeoMessage.Event == ZeoEvent.HeadbandDocked)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (IOException)
+            {
+            }
+            finally
+            {
+                if (this.binFile != null)
+                {
+                    this.binFile.Close();
+                    this.binFile = null;
+                }
+            }
         }
 
         public ChannelData[] ReadFrequencyDataFromLastPosition(ref int lastPosition, int len)
@@ -204,7 +288,7 @@ namespace ZeoScope
             for (int i = lastPosition, j = 0; i < (lastPosition + len) && i < this.zeoMessages.Count; i++, j++)
             {
                 ZeoMessage zeoMessage = this.zeoMessages[i];
-                freqData[j] = new ChannelData(ZeoMessage.FrequencyBinsLength + 1);
+                freqData[j] = new ChannelData(ZeoMessage.FrequencyBinsLength + 2);
                 if (zeoMessage.FrequencyBins != null)
                 {
                     int k = 0;
@@ -217,11 +301,13 @@ namespace ZeoScope
                 }
                 else
                 {
-                    freqData[j].Values[freqData[j].Values.Length - 1] = zeoMessage.Impedance ?? 0;
+                    freqData[j].Values[freqData[j].Values.Length - 2] = zeoMessage.Impedance ?? 0;
                 }
+
+                freqData[j].Values[freqData[j].Values.Length - 1] = zeoMessage.SoundAlarmVolume;
             }
 
-            if (this.isLiveStream)
+            if (this.LiveStream)
             {
                 lastPosition = this.Length - len;
                 if (lastPosition < 0)
@@ -297,7 +383,7 @@ namespace ZeoScope
                 }
             }
 
-            if (this.isLiveStream)
+            if (this.LiveStream)
             {
                 lastPosition = ((this.Length * ZeoMessage.SamplesPerMessage) - len) / ZeoMessage.SamplesPerMessage;
                 if (lastPosition < 0)
@@ -317,76 +403,14 @@ namespace ZeoScope
             return eegValues;
         }
 
-        public void OpenLiveStream(string comPortName, string fileName)
-        {
-            Directory.CreateDirectory("ZeoData");
-
-            this.isLiveStream = true;
-            this.fileName = string.Format(@"ZeoData\{0}_{1}.zeo", fileName, DateTime.Now.ToString("yyyy-MM-dd_HHmmss"));
-            this.binFile = new FileStream(this.fileName, FileMode.CreateNew);
-            this.AddVersionString();
-
-            this.serialPort = new SerialPort(comPortName, 38400, Parity.None, 8, StopBits.One);
-            this.serialPort.Open();
-            this.serialPort.DiscardInBuffer();
-
-            this.readThread = new Thread(new ThreadStart(this.ReadSerialStream));
-            this.readThread.Start();
-        }
-
-        public void OpenFileStream(string fileName)
-        {
-            this.fileName = fileName;
-
-            this.binFile = new FileStream(this.fileName, FileMode.Open);
-            this.CheckVersionString();
-
-            try
-            {
-                while (true)
-                {
-                    ZeoMessage zeoMessage = this.ReadMessage();
-
-                    if (zeoMessage.Waveform != null)
-                    {
-                        break;
-                    }
-                }
-
-                while (true)
-                {
-                    ZeoMessage zeoMessage = this.ReadMessage();
-                    if (zeoMessage != null)
-                    {
-                        this.zeoMessages.Add(zeoMessage);
-                        if (zeoMessage.Event == ZeoEvent.HeadbandDocked)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-            catch (IOException)
-            {
-            }
-            finally
-            {
-                if (this.binFile != null)
-                {
-                    this.binFile.Close();
-                    this.binFile = null;
-                }
-            }
-        }
-
         public DateTime? GetTimeFromIndex(int index)
         {
-            if (this.zeoMessages.Count > index)
+            if (index >= 0 && this.zeoMessages.Count > index)
             {
                 // DirectX switches the FPU to single precision instead of double
                 // Hence this work around to have 1 second precision
                 // Web search: "DirectX single precision"
-                uint seconds = this.zeoMessages[index].ZeoTimestamp;
+                int seconds = this.zeoMessages[index].ZeoTimestamp;
                 uint step = 10000;
                 DateTime d = ZeoMessage.UnixEpoch;
 
@@ -414,39 +438,48 @@ namespace ZeoScope
 
         public void Dispose()
         {
-            if (this.binFile != null)
+            try
             {
-                this.binFile.Close();
-                this.binFile = null;
-            }
+                if (this.binFile != null)
+                {
+                    this.binFile.Close();
+                    this.binFile = null;
+                }
 
-            if (this.serialPort != null)
+                if (this.serialPort != null)
+                {
+                    this.serialPort.Close();
+                    this.serialPort = null;
+                }
+            }
+            catch (IOException)
             {
-                this.serialPort.Close();
-                this.serialPort = null;
             }
         }
+        #endregion
 
+        #region Private Methods
         private void ReadSerialStream()
         {
-            bool waveMessage = false;
+            Thread.CurrentThread.Name = "ReadSerialStream";
+
+            this.writeEnabled = false;
 
             while (this.exitWorkerEvent.WaitOne(0, true) == false)
             {
                 try
                 {
-                    if (waveMessage == false)
+                    if (this.writeEnabled == false)
                     {
                         ZeoMessage zeoMessage = this.ReadMessage();
 
                         if (zeoMessage.Waveform != null)
                         {
-                            waveMessage = true;
                             this.writeEnabled = true;
                         }
                     }
 
-                    if (waveMessage == true)
+                    if (this.writeEnabled == true)
                     {
                         ZeoMessage zeoMessage = this.ReadMessage();
 
@@ -455,6 +488,15 @@ namespace ZeoScope
                             this.rwLock.AcquireWriterLock(Timeout.Infinite);
                             this.zeoMessages.Add(zeoMessage);
                             this.rwLock.ReleaseLock();
+
+                            if (this.soundAlarm != null)
+                            {
+                                ZeoMessage zm = this.soundAlarm.ProcessZeoMessage(zeoMessage);
+                                if (zm != null)
+                                {
+                                    this.WriteZ9Message(zm, Z9DataType.SoundAlarmVolume);
+                                }
+                            }
 
                             if (zeoMessage.Event == ZeoEvent.HeadbandDocked)
                             {
@@ -485,6 +527,8 @@ namespace ZeoScope
                 {
                 }
             }
+
+            this.LiveStream = false;
         }
 
         private void AddVersionString()
@@ -536,20 +580,23 @@ namespace ZeoScope
         {
             ZeoMessage zeoMessage = new ZeoMessage();
 
+            // A4 are standard Zeo messages
             bool isA4 = false;
+            
+            // Z9 are additional messages from ZeoScope
+            bool isZ9 = false; 
+
             byte header = 0;
             for (int j = 0; j < 20; j++)
             {
                 int i;
                 for (i = 0; i < 500; i++)
                 {
-                    // 'A'
-                    if (header == 0x41)
+                    if (header == 'A')
                     {
                         header = this.ReadByte();
 
-                        // '4'
-                        if (header == 0x34)
+                        if (header == '4')
                         {
                             isA4 = true;
                             break;
@@ -559,6 +606,21 @@ namespace ZeoScope
                             continue;
                         }
                     }
+                    else if (header == 'Z')
+                    {
+                        header = this.ReadByte();
+
+                        if (header == '9')
+                        {
+                            isZ9 = true;
+                            break;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
 
                     header = this.ReadByte();
                 }
@@ -570,98 +632,207 @@ namespace ZeoScope
 
                 if (isA4 == true)
                 {
-                    byte checkSum = this.ReadByte();
-
-                    this.ReadNBytes(2);
-                    int length = this.buffer[0] | this.buffer[1] << 8;
-
-                    this.ReadNBytes(2);
-                    int lengthN = this.buffer[0] | this.buffer[1] << 8;
-
-                    if ((short)length != (short)(~lengthN))
+                    ZeoDataType dataType = this.ReadA4Message(zeoMessage);
+                    if (dataType == ZeoDataType.SliceEnd)
                     {
-                        // TODO: log error
+                        return zeoMessage;
+                    }
+                    else if (dataType == ZeoDataType.Error)
+                    {
                         return null;
                     }
-
-                    byte unixT = this.ReadByte();
-
-                    this.ReadNBytes(2);
-                    float subsecondT = (this.buffer[0] | this.buffer[1] << 8) / 65535.0f;
-
-                    byte sequence = this.ReadByte();
-
-                    ZeoDataType dataType = (ZeoDataType)this.ReadByte();
-
-                    this.ReadNBytes(length - 1);
-
-                    switch (dataType)
-                    {
-                        case ZeoDataType.FrequencyBins:
-                            short[] shorts = new short[7];
-                            Buffer.BlockCopy(this.buffer, 0, shorts, 0, 14);
-                            float[] floats = new float[7];
-                            for (int k = 0; k < 7; k++)
-                            {
-                                floats[k] = (shorts[k] / 32767.0f) * 100.0f;
-                            }
-
-                            zeoMessage.FrequencyBins = floats;
-                            break;
-
-                        case ZeoDataType.Waveform:
-                            shorts = new short[128];
-                            Buffer.BlockCopy(this.buffer, 0, shorts, 0, 256);
-
-                            floats = new float[128];
-                            for (int k = 0; k < 128; k++)
-                            {
-                                floats[k] = (shorts[k] / 32767.0f) * 315.0f;
-                            }
-
-                            zeoMessage.Waveform = floats;
-                            zeoMessage.Second = unixT + subsecondT;
-
-                            // 128 16-bit samples per ~1.005 sec
-                            break;
-
-                        case ZeoDataType.ZeoTimestamp:
-                            zeoMessage.ZeoTimestamp = (uint)this.GetInt32();
-                            break;
-
-                        case ZeoDataType.Event:
-                            zeoMessage.Event = (ZeoEvent)this.GetInt32();
-                            break;
-
-                        case ZeoDataType.Version:
-                            break;
-
-                        case ZeoDataType.SQI:
-                            zeoMessage.SQI = this.GetInt32();
-                            break;
-
-                        case ZeoDataType.BadSignal:
-                            zeoMessage.BadSignal = this.GetInt32() == 0 ? false : true;
-                            break;
-
-                        case ZeoDataType.Impedance:
-                            zeoMessage.Impedance = this.GetImpedance();
-                            break;
-
-                        case ZeoDataType.SleepStage:
-                            zeoMessage.SleepStage = (ZeoSleepStage)this.GetInt32();
-                            break;
-
-                        case ZeoDataType.SliceEnd:
-                            return zeoMessage;
-
-                        default:
-                            return null;
-                    }
+                }
+                else if (isZ9 == true)
+                {
+                    this.ReadZ9Message();
+                    return null;
                 }
             }
 
             return null;
+        }
+
+        private ZeoDataType ReadA4Message(ZeoMessage zeoMessage)
+        {
+            byte checkSum = this.ReadByte();
+
+            this.ReadNBytes(2);
+            int length = this.buffer[0] | this.buffer[1] << 8;
+
+            this.ReadNBytes(2);
+            int lengthN = this.buffer[0] | this.buffer[1] << 8;
+
+            if ((short)length != (short)(~lengthN))
+            {
+                // TODO: log error
+                return ZeoDataType.Error;
+            }
+
+            byte unixT = this.ReadByte();
+
+            this.ReadNBytes(2);
+            float subsecondT = (this.buffer[0] | this.buffer[1] << 8) / 65535.0f;
+
+            byte sequence = this.ReadByte();
+
+            ZeoDataType dataType = (ZeoDataType)this.ReadByte();
+
+            this.ReadNBytes(length - 1);
+
+            switch (dataType)
+            {
+                case ZeoDataType.FrequencyBins:
+                    short[] shorts = new short[7];
+                    Buffer.BlockCopy(this.buffer, 0, shorts, 0, 14);
+                    float[] floats = new float[7];
+                    for (int k = 0; k < 7; k++)
+                    {
+                        floats[k] = (shorts[k] / 32767.0f) * 100.0f;
+                    }
+
+                    zeoMessage.FrequencyBins = floats;
+                    break;
+
+                case ZeoDataType.Waveform:
+                    shorts = new short[128];
+                    Buffer.BlockCopy(this.buffer, 0, shorts, 0, 256);
+
+                    floats = new float[128];
+                    for (int k = 0; k < 128; k++)
+                    {
+                        floats[k] = (shorts[k] / 32767.0f) * 315.0f;
+                    }
+
+                    zeoMessage.Waveform = floats;
+                    zeoMessage.Second = unixT + subsecondT;
+
+                    // 128 16-bit samples per ~1.005 sec
+                    break;
+
+                case ZeoDataType.ZeoTimestamp:
+                    zeoMessage.ZeoTimestamp = this.GetInt32();
+                    break;
+
+                case ZeoDataType.Event:
+                    zeoMessage.Event = (ZeoEvent)this.GetInt32();
+                    break;
+
+                case ZeoDataType.Version:
+                    break;
+
+                case ZeoDataType.SQI:
+                    zeoMessage.SQI = this.GetInt32();
+                    break;
+
+                case ZeoDataType.BadSignal:
+                    zeoMessage.BadSignal = this.GetInt32() == 0 ? false : true;
+                    break;
+
+                case ZeoDataType.Impedance:
+                    zeoMessage.Impedance = this.GetImpedance();
+                    break;
+
+                case ZeoDataType.SleepStage:
+                    zeoMessage.SleepStage = (ZeoSleepStage)this.GetInt32();
+                    break;
+
+                case ZeoDataType.SliceEnd:
+                    break;
+
+                default:
+                    return ZeoDataType.Error;
+            }
+
+            return dataType;
+        }
+
+        private void ReadZ9Message()
+        {
+            this.ReadNBytes(2);
+            int length = this.buffer[0] | this.buffer[1] << 8;
+
+            // ZeoTimestamp is used as an index to update ZeoMessage in the list
+            this.ReadNBytes(4);
+            uint zeoTimestamp = (uint)this.GetInt32();
+            ZeoMessage zeoMessage = this.GetZeoMessage(zeoTimestamp);
+
+            Z9DataType dataType = (Z9DataType)this.ReadByte();
+
+            this.ReadNBytes(length);
+
+            switch (dataType)
+            {
+                case Z9DataType.SoundAlarmVolume:
+                    zeoMessage.SoundAlarmVolume = this.GetInt32();
+                    break;
+                case Z9DataType.SoundAlarmEnabled:
+                    this.SoundAlarmEnabled = this.buffer[0] != 0;
+                    break;
+            }
+        }
+
+        private void WriteZ9Message(ZeoMessage zeoMessage, Z9DataType dataType)
+        {
+            short[] lengths = new short[] { 4, 1 };
+
+            if (this.binFile != null && this.binFile.CanWrite == true)
+            {
+                byte[] bytes = new byte[] { (byte)'Z', (byte)'9' };
+                this.binFile.Write(bytes, 0, bytes.Length);
+
+                this.WriteInt16(lengths[(int)dataType]);
+                this.WriteInt32(zeoMessage.ZeoTimestamp);
+
+                this.binFile.WriteByte((byte)dataType);
+
+                switch (dataType)
+                {
+                    case Z9DataType.SoundAlarmVolume:
+                        {
+                            this.WriteInt32(zeoMessage.SoundAlarmVolume);
+                            break;
+                        }
+                    case Z9DataType.SoundAlarmEnabled:
+                        {
+                            this.binFile.WriteByte(1);
+                            break;
+                        }
+                }
+            }
+        }
+
+        private void WriteInt32(int n)
+        {
+            int[] ints = new int[] { n };
+            byte[] bytes = new byte[4];
+            Buffer.BlockCopy(ints, 0, bytes, 0, 4);
+            this.binFile.Write(bytes, 0, bytes.Length);
+        }
+
+        private void WriteInt16(short s)
+        {
+            short[] shorts = new short[] { s };
+            byte[] bytes = new byte[2];
+            Buffer.BlockCopy(shorts, 0, bytes, 0, 2);
+            this.binFile.Write(bytes, 0, bytes.Length);
+        }
+
+        private ZeoMessage GetZeoMessage(uint zeoTimestamp)
+        {
+            this.rwLock.AcquireReaderLock(Timeout.Infinite);
+
+            // start from the end
+            for (int i = this.zeoMessages.Count - 1; i >= 0; i--)
+            {
+                if (this.zeoMessages[i].ZeoTimestamp == zeoTimestamp)
+                {
+                    return this.zeoMessages[i];
+                }
+            }
+
+            this.rwLock.ReleaseLock();
+
+            return new ZeoMessage();
         }
 
         private int GetInt32()
@@ -690,7 +861,7 @@ namespace ZeoScope
 
         private void ReadNBytes(int count)
         {
-            if (this.isLiveStream == true)
+            if (this.LiveStream == true)
             {
                 int n = 0;
                 do
@@ -712,7 +883,7 @@ namespace ZeoScope
 
         private byte ReadByte()
         {
-            if (this.isLiveStream == true)
+            if (this.LiveStream == true)
             {
                 byte b = (byte)this.serialPort.ReadByte();
 
@@ -733,41 +904,6 @@ namespace ZeoScope
 
                 return (byte)b;
             }
-        }
-
-        private ZeoMessage GetMessage(int index)
-        {
-            this.rwLock.AcquireReaderLock(Timeout.Infinite);
-
-            ZeoMessage zeoMessage = new ZeoMessage();
-            if (this.zeoMessages.Count > index)
-            {
-                zeoMessage.BadSignal = this.zeoMessages[index].BadSignal ?? true;
-                zeoMessage.Event = this.zeoMessages[index].Event;
-                zeoMessage.FrequencyBins = this.zeoMessages[index].FrequencyBins;
-                zeoMessage.Impedance = this.zeoMessages[index].Impedance ?? 0;
-                zeoMessage.Second = this.zeoMessages[index].Second;
-                zeoMessage.SleepStage = this.zeoMessages[index].SleepStage;
-                zeoMessage.SQI = this.zeoMessages[index].SQI ?? 0;
-                zeoMessage.ZeoTimestamp = this.zeoMessages[index].ZeoTimestamp;
-
-                if (zeoMessage.SleepStage == null)
-                {
-                    zeoMessage.SleepStage = ZeoSleepStage.Undefined;
-                    for (int i = index - 1; i >= 0; i--)
-                    {
-                        if (this.zeoMessages[i].SleepStage != null)
-                        {
-                            zeoMessage.SleepStage = this.zeoMessages[i].SleepStage;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            this.rwLock.ReleaseLock();
-
-            return zeoMessage;
         }
 
         private ChannelData[] Filter50Hz(ChannelData[] signal)
@@ -808,5 +944,6 @@ namespace ZeoScope
 
             return filteredSignal;
         }
+        #endregion
     }
 }

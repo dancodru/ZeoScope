@@ -5,12 +5,13 @@ namespace ZeoScope
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
+    using System.IO.Ports;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading;
     using System.Windows.Forms;
+
     using Microsoft.DirectX.Direct3D;
-    using System.IO.Ports;
 
     internal partial class MainScreen : Form
     {
@@ -23,13 +24,11 @@ namespace ZeoScope
 
         private ZeoStream zeoStream;
 
-        private SoundAlarm lucidAlarm;
+        private SoundAlarm soundAlarm;
 
         private int eegLastPosition = 0;
         private int freqLastPosition = 0;
         private int stageLastPosition = 0;
-
-        private delegate void StopDelegate(object sender, EventArgs e);
         #endregion
 
         #region Drawing methods
@@ -54,7 +53,16 @@ namespace ZeoScope
                     this.eegScopePanel.ResumeLayout();
                 }
 
-                DateTime? time = this.zeoStream.GetTimeFromIndex(this.eegLastPosition);
+                DateTime? time = null;
+                if (this.zeoStream.LiveStream == true)
+                {
+                    time = this.zeoStream.GetTimeFromIndex(this.zeoStream.Length - 1);
+                }
+                else
+                {
+                    time = this.zeoStream.GetTimeFromIndex(this.eegLastPosition);
+                }
+
                 if (time != null)
                 {
                     time.Value.AddSeconds(this.eegScopePanel.ScopeX / ZeoStream.SamplesPerSec);
@@ -92,6 +100,7 @@ namespace ZeoScope
 
             ZeoSettings.Default.Save();
         }
+
         protected override void OnClosed(EventArgs e)
         {
             this.exitEvent.Set();
@@ -107,6 +116,10 @@ namespace ZeoScope
 
         protected override void OnResize(EventArgs e)
         {
+            // TODO: Fix this workaround
+            this.eegScopePanel.Height++;
+            this.eegScopePanel.Height--;
+
             base.OnResize(e);
             this.Render();
         }
@@ -145,49 +158,58 @@ namespace ZeoScope
 
             this.zeoStream = new ZeoStream(this.exitEvent);
             this.zeoStream.HeadbandDocked += new EventHandler(this.ZeoStream_HeadbandDocked);
-            this.zeoStream.OpenLiveStream(this.comPortToolStripComboBox.Text, this.fileNameToolStripComboBox.Text);
+
+            if (ZeoSettings.Default.LucidAlarmEnabled == true && File.Exists(ZeoSettings.Default.MP3FileName) == true)
+            {
+                this.soundAlarm = new SoundAlarm(ZeoSettings.Default.MP3FileName, ZeoSettings.Default.AlarmFadeIn, ZeoSettings.Default.AlarmFadeOut,
+                    ZeoSettings.Default.AlarmDuration, ZeoSettings.Default.AlarmFromTime, ZeoSettings.Default.AlarmToTime, ZeoSettings.Default.AlarmCue);
+            }
+
+            this.zeoStream.OpenLiveStream(this.comPortToolStripComboBox.Text, this.fileNameToolStripComboBox.Text, this.soundAlarm);
 
             this.SetFormText(this.zeoStream.FileName);
 
             this.startToolStripButton.Enabled = false;
             this.settingsToolStripButton.Enabled = false;
+            this.openToolStripButton.Enabled = false;
             this.stopToolStripButton.Enabled = true;
+
+            this.SaveFileNames();
         }
 
         private void ZeoStream_HeadbandDocked(object sender, EventArgs e)
         {
-            StopDelegate stopDelegate = new StopDelegate(this.StopToolStripButton_Click);
-            this.Invoke(stopDelegate, sender, e);
+            this.Invoke(new EventHandler(this.StopToolStripButton_Click), sender, e);
         }
 
         private void StopToolStripButton_Click(object sender, EventArgs e)
         {
             if (this.zeoStream.LiveStream == true)
             {
-                this.zeoStream.LiveStream = false;
                 this.exitEvent.Set();
 
                 this.startToolStripButton.Enabled = true;
                 this.settingsToolStripButton.Enabled = true;
+                this.openToolStripButton.Enabled = true;
                 this.stopToolStripButton.Enabled = false;
-                
+
                 this.SetFormText(this.zeoStream.FileName);
 
-                if (this.lucidAlarm != null)
+                if (this.soundAlarm != null)
                 {
-                    this.lucidAlarm.Dispose();
-                    this.lucidAlarm = null;
+                    this.soundAlarm.Dispose();
+                    this.soundAlarm = null;
                 }
 
                 return;
             }
         }
 
-        private void LoadToolStripButton_Click(object sender, EventArgs e)
+        private void OpenToolStripButton_Click(object sender, EventArgs e)
         {
-            if (this.loadScopeFileDialog.ShowDialog() == DialogResult.OK)
+            if (this.openScopeFileDialog.ShowDialog() == DialogResult.OK)
             {
-                this.LoadFile(this.loadScopeFileDialog.FileName);
+                this.LoadFile(this.openScopeFileDialog.FileName);
             }
         }
 
@@ -268,6 +290,78 @@ namespace ZeoScope
             SettingsForm settingsForm = new SettingsForm();
             settingsForm.ShowDialog(this);
             settingsForm.Dispose();
+
+            if (ZeoSettings.Default.LucidAlarmEnabled == true)
+            {
+                this.settingsToolStripButton.BackColor = Color.FromArgb(200, 255, 180);
+            }
+            else
+            {
+                this.settingsToolStripButton.BackColor = SystemColors.Control;
+            }
+        }
+
+        private void MainScreen_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Stop the allarm if any key is ressed
+            if (this.soundAlarm != null && this.soundAlarm.AlarmStarted == true)
+            {
+                this.soundAlarm.AlarmStarted = false;
+                return;
+            }
+
+            if (this.fileNameToolStripComboBox.Focused == true)
+            {
+                return;
+            }
+
+            switch (e.KeyChar)
+            {
+                case ' ':
+                    {
+                        if (this.startToolStripButton.Enabled == true)
+                        {
+                            this.StartToolStripButton_Click(this.startToolStripButton, null);
+                        }
+
+                        break;
+                    }
+
+                case 'o':
+                case 'O':
+                    {
+                        if (this.openToolStripButton.Enabled == true)
+                        {
+                            this.OpenToolStripButton_Click(this.openToolStripButton, null);
+                        }
+
+                        break;
+                    }
+
+                case 's':
+                case 'S':
+                    {
+                        if (this.stopToolStripButton.Enabled == true)
+                        {
+                            this.StopToolStripButton_Click(this.stopToolStripButton, null);
+                        }
+
+                        break;
+                    }
+
+                case 't':
+                case 'T':
+                    {
+                        if (this.settingsToolStripButton.Enabled == true)
+                        {
+                            this.SettingsToolStripButton_Click(this.settingsToolStripButton, null);
+                        }
+
+                        break;
+                    }
+                default:
+                    break;
+            }
         }
         #endregion
 
@@ -279,7 +373,7 @@ namespace ZeoScope
             this.timer = new Stopwatch();
 
             this.comPortToolStripComboBox.Items.Clear();
-            
+
             // TODO: this takes a lot of time, need to create a thread/delegate here
             this.comPortToolStripComboBox.Items.AddRange(Ftdi.GetComPortList());
             if (this.comPortToolStripComboBox.Items.Count == 0)
@@ -302,17 +396,17 @@ namespace ZeoScope
             this.eegScopePanel.MaxValueDisplay = new float[] { eegLevel };
             this.eegScopePanel.MinValueDisplay = new float[] { -eegLevel };
 
-            if(this.fileNameToolStripComboBox.Items.Count > 0)
+            if (this.fileNameToolStripComboBox.Items.Count > 0)
             {
                 this.fileNameToolStripComboBox.SelectedIndex = 0;
             }
 
             this.freqScopePanel.SamplesPerSecond = 1.0;
-            this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 1;
-            this.freqScopePanel.MaxValueDisplay = new float[] { 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 3.0f, 1500.0f };
-            this.freqScopePanel.MinValueDisplay = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            this.freqScopePanel.GraphColors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Cyan, Color.Magenta, Color.Yellow, Color.Coral, Color.FromArgb(80, 80, 80) };
-            this.freqScopePanel.LabelFormatStrings = new string[] { "D: {0:0.00}", "T: {0:0.00}", "A: {0:0.00}", "B1: {0:0.00}", "B2: {0:0.00}", "B3: {0:0.00}", "G: {0:0.00}", "Imp: {0:0.0}" };
+            this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2;
+            this.freqScopePanel.MaxValueDisplay = new float[] { 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 3.0f, 1500.0f, 4000 };
+            this.freqScopePanel.MinValueDisplay = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, SoundAlarm.MinVolume - 200 };
+            this.freqScopePanel.GraphColors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Cyan, Color.Magenta, Color.Yellow, Color.Coral, Color.FromArgb(80, 80, 80), Color.Brown };
+            this.freqScopePanel.LabelFormatStrings = new string[] { "D: {0:0.00}", "T: {0:0.00}", "A: {0:0.00}", "B1: {0:0.00}", "B2: {0:0.00}", "B3: {0:0.00}", "G: {0:0.00}", "Imp: {0:0.0}", "V: {0}" };
             this.freqScopePanel.HorizontalLinesCount = 0;
 
             // Restore from ZeoSettings
@@ -322,6 +416,41 @@ namespace ZeoScope
             this.Height = ZeoSettings.Default.WindowHeight;
             this.Width = ZeoSettings.Default.WindowWidth;
             this.freqScopePanel.Height = ZeoSettings.Default.FreqPanelHeight;
+
+            if (ZeoSettings.Default.LucidAlarmEnabled == true)
+            {
+                this.settingsToolStripButton.BackColor = Color.FromArgb(200, 255, 180);
+            }
+
+            this.LoadFileNames();
+        }
+
+        private void LoadFileNames()
+        {
+            string[] fileNames = ZeoSettings.Default.FileNames.Split(';');
+            this.fileNameToolStripComboBox.Items.Clear();
+            this.fileNameToolStripComboBox.Items.AddRange(fileNames);
+            if (this.fileNameToolStripComboBox.Items.Count > 0)
+            {
+                this.fileNameToolStripComboBox.SelectedIndex = 0;
+            }
+        }
+
+        private void SaveFileNames()
+        {
+            string currentFileName = this.fileNameToolStripComboBox.Text;
+            List<string> fileNames = new List<string>();
+            fileNames.AddRange(ZeoSettings.Default.FileNames.Split(';'));
+            fileNames.Remove(currentFileName);
+            fileNames.Insert(0, currentFileName);
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (string fileName in fileNames)
+            {
+                stringBuilder.Append(fileName + ";");
+            }
+
+            ZeoSettings.Default.FileNames = stringBuilder.ToString().Trim(';');
+            ZeoSettings.Default.Save();
         }
 
         [STAThread]
@@ -351,6 +480,11 @@ namespace ZeoScope
                 frm.InitializeGraphics();
                 frm.Show();
                 frm.Render();
+
+                // TODO: Fix this workaround
+                frm.eegScopePanel.Height++;
+                frm.eegScopePanel.Height--;
+
                 if (args.Length > 0)
                 {
                     if (File.Exists(args[0]))

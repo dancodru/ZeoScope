@@ -9,14 +9,13 @@
         private ScopePanel eegScopePanel;
         private ScopePanel freqScopePanel;
         private ScopePanel stageScopePanel;
-
         private Splitter splitter;
         private ToolStrip toolStrip;
         private ToolStripButton startToolStripButton;
         private ToolStripButton stopToolStripButton;
         private ToolStripComboBox comPortToolStripComboBox;
         private ToolStripSeparator toolStripSeparator1;
-        private ToolStripButton loadToolStripButton;
+        private ToolStripButton openToolStripButton;
         private ToolStripLabel toolStripLabel2;
         private ToolStripLabel toolStripLabel1;
         private ToolStripSeparator toolStripSeparator2;
@@ -25,9 +24,10 @@
         private ToolStripComboBox eegLevelToolStripComboBox;
         private ToolStripLabel toolStripLabel4;
         private ToolStripComboBox fileNameToolStripComboBox;
-
-        private OpenFileDialog loadScopeFileDialog;
+        private OpenFileDialog openScopeFileDialog;
         private SaveFileDialog saveFileDialog;
+        private ToolStripSeparator toolStripSeparator4;
+        private ToolStripButton settingsToolStripButton;
 
         /// <summary>
         /// Required designer variable.
@@ -57,7 +57,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainScreen));
-            this.loadScopeFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.openScopeFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitter = new System.Windows.Forms.Splitter();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.eegScopePanel = new ZeoScope.ScopePanel();
@@ -67,7 +67,7 @@
             this.toolStripLabel4 = new System.Windows.Forms.ToolStripLabel();
             this.comPortToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.loadToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.fileNameToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
@@ -83,15 +83,15 @@
             this.toolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // loadScopeFileDialog
+            // openScopeFileDialog
             // 
-            this.loadScopeFileDialog.Filter = "Zeo files (*.zeo)|*.zeo";
+            this.openScopeFileDialog.Filter = "Zeo files (*.zeo)|*.zeo";
             // 
             // splitter
             // 
             this.splitter.BackColor = System.Drawing.Color.DimGray;
             this.splitter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.splitter.Location = new System.Drawing.Point(0, 176);
+            this.splitter.Location = new System.Drawing.Point(0, 276);
             this.splitter.Name = "splitter";
             this.splitter.Size = new System.Drawing.Size(784, 3);
             this.splitter.TabIndex = 15;
@@ -117,7 +117,7 @@
             this.eegScopePanel.ScopeX = 95;
             this.eegScopePanel.ScrollBarMaximum = 0;
             this.eegScopePanel.ScrollBarValue = 0;
-            this.eegScopePanel.Size = new System.Drawing.Size(784, 179);
+            this.eegScopePanel.Size = new System.Drawing.Size(784, 279);
             this.eegScopePanel.TabIndex = 0;
             this.eegScopePanel.TimeString = null;
             this.eegScopePanel.Title = "EEG";
@@ -131,7 +131,7 @@
             this.toolStripLabel4,
             this.comPortToolStripComboBox,
             this.toolStripSeparator1,
-            this.loadToolStripButton,
+            this.openToolStripButton,
             this.toolStripSeparator2,
             this.toolStripLabel2,
             this.fileNameToolStripComboBox,
@@ -155,6 +155,7 @@
             this.startToolStripButton.Name = "startToolStripButton";
             this.startToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.startToolStripButton.Text = "Start Recording";
+            this.startToolStripButton.ToolTipText = "Start Recording (Space)";
             this.startToolStripButton.Click += new System.EventHandler(this.StartToolStripButton_Click);
             // 
             // stopToolStripButton
@@ -166,6 +167,7 @@
             this.stopToolStripButton.Name = "stopToolStripButton";
             this.stopToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.stopToolStripButton.Text = "Stop Recording";
+            this.stopToolStripButton.ToolTipText = "Stop Recording (S)";
             this.stopToolStripButton.Click += new System.EventHandler(this.StopToolStripButton_Click);
             // 
             // toolStripLabel4
@@ -189,15 +191,16 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // loadToolStripButton
+            // openToolStripButton
             // 
-            this.loadToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.loadToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("loadToolStripButton.Image")));
-            this.loadToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.loadToolStripButton.Name = "loadToolStripButton";
-            this.loadToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.loadToolStripButton.Text = "Open Zeo File";
-            this.loadToolStripButton.Click += new System.EventHandler(this.LoadToolStripButton_Click);
+            this.openToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.openToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripButton.Image")));
+            this.openToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.openToolStripButton.Name = "openToolStripButton";
+            this.openToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.openToolStripButton.Text = "Open Zeo File";
+            this.openToolStripButton.ToolTipText = "Open Zeo File (O)";
+            this.openToolStripButton.Click += new System.EventHandler(this.OpenToolStripButton_Click);
             // 
             // toolStripSeparator2
             // 
@@ -212,10 +215,11 @@
             // 
             // fileNameToolStripComboBox
             // 
+            this.fileNameToolStripComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.fileNameToolStripComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.fileNameToolStripComboBox.AutoToolTip = true;
             this.fileNameToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
-            this.fileNameToolStripComboBox.Items.AddRange(new object[] {
-            "ZeoData"});
+            this.fileNameToolStripComboBox.MaxDropDownItems = 20;
             this.fileNameToolStripComboBox.Name = "fileNameToolStripComboBox";
             this.fileNameToolStripComboBox.Size = new System.Drawing.Size(75, 25);
             this.fileNameToolStripComboBox.Text = "ZeoData";
@@ -268,6 +272,7 @@
             this.settingsToolStripButton.Name = "settingsToolStripButton";
             this.settingsToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.settingsToolStripButton.Text = "Settings";
+            this.settingsToolStripButton.ToolTipText = "Settings (T)";
             this.settingsToolStripButton.Click += new System.EventHandler(this.SettingsToolStripButton_Click);
             // 
             // freqScopePanel
@@ -277,7 +282,7 @@
             this.freqScopePanel.HorizontalLinesCount = 0;
             this.freqScopePanel.LabelFormatStrings = null;
             this.freqScopePanel.LabelSpacing = 100;
-            this.freqScopePanel.Location = new System.Drawing.Point(0, 179);
+            this.freqScopePanel.Location = new System.Drawing.Point(0, 279);
             this.freqScopePanel.MaxValueDisplay = null;
             this.freqScopePanel.MinValueDisplay = null;
             this.freqScopePanel.Name = "freqScopePanel";
@@ -287,7 +292,7 @@
             this.freqScopePanel.ScopeX = 0;
             this.freqScopePanel.ScrollBarMaximum = 0;
             this.freqScopePanel.ScrollBarValue = 0;
-            this.freqScopePanel.Size = new System.Drawing.Size(784, 200);
+            this.freqScopePanel.Size = new System.Drawing.Size(784, 100);
             this.freqScopePanel.SplitterPanelVisible = false;
             this.freqScopePanel.TabIndex = 3;
             this.freqScopePanel.TimeString = null;
@@ -334,6 +339,7 @@
             this.Controls.Add(this.freqScopePanel);
             this.Controls.Add(this.stageScopePanel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MinimumSize = new System.Drawing.Size(600, 600);
             this.Name = "MainScreen";
             this.Tag = "Zeo Scope";
@@ -341,6 +347,7 @@
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainScreen_FormClosed);
             this.Shown += new System.EventHandler(this.MainScreen_Shown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainScreen_KeyPress);
             this.eegScopePanel.ResumeLayout(false);
             this.eegScopePanel.PerformLayout();
             this.toolStrip.ResumeLayout(false);
@@ -350,8 +357,5 @@
         }
 
         #endregion
-
-        private ToolStripSeparator toolStripSeparator4;
-        private ToolStripButton settingsToolStripButton;
     }
 }

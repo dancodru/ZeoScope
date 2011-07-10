@@ -25,7 +25,7 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool LucidAlarmEnabled {
             get {
                 return ((bool)(this["LucidAlarmEnabled"]));
@@ -49,7 +49,7 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("BrownNoise10min.mp3")]
         public string MP3FileName {
             get {
                 return ((string)(this["MP3FileName"]));
@@ -61,37 +61,37 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LucidAlarmCue {
+        [global::System.Configuration.DefaultSettingValueAttribute("40R")]
+        public string AlarmCue {
             get {
-                return ((string)(this["LucidAlarmCue"]));
+                return ((string)(this["AlarmCue"]));
             }
             set {
-                this["LucidAlarmCue"] = value;
+                this["AlarmCue"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LucidAlarmFromTime {
+        public string AlarmFromTime {
             get {
-                return ((string)(this["LucidAlarmFromTime"]));
+                return ((string)(this["AlarmFromTime"]));
             }
             set {
-                this["LucidAlarmFromTime"] = value;
+                this["AlarmFromTime"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LucidAlarmToTime {
+        public string AlarmToTime {
             get {
-                return ((string)(this["LucidAlarmToTime"]));
+                return ((string)(this["AlarmToTime"]));
             }
             set {
-                this["LucidAlarmToTime"] = value;
+                this["AlarmToTime"] = value;
             }
         }
         
@@ -109,13 +109,13 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ZeoFileNames {
+        [global::System.Configuration.DefaultSettingValueAttribute("ZeoData")]
+        public string FileNames {
             get {
-                return ((string)(this["ZeoFileNames"]));
+                return ((string)(this["FileNames"]));
             }
             set {
-                this["ZeoFileNames"] = value;
+                this["FileNames"] = value;
             }
         }
         
@@ -169,37 +169,49 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60")]
-        public int FadeIn {
+        [global::System.Configuration.DefaultSettingValueAttribute("01:30")]
+        public string AlarmFadeIn {
             get {
-                return ((int)(this["FadeIn"]));
+                return ((string)(this["AlarmFadeIn"]));
             }
             set {
-                this["FadeIn"] = value;
+                this["AlarmFadeIn"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("30")]
-        public int FadeOut {
+        [global::System.Configuration.DefaultSettingValueAttribute("00:30")]
+        public string AlarmFadeOut {
             get {
-                return ((int)(this["FadeOut"]));
+                return ((string)(this["AlarmFadeOut"]));
             }
             set {
-                this["FadeOut"] = value;
+                this["AlarmFadeOut"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("120")]
-        public int AlarmDuration {
+        [global::System.Configuration.DefaultSettingValueAttribute("02:00")]
+        public string AlarmDuration {
             get {
-                return ((int)(this["AlarmDuration"]));
+                return ((string)(this["AlarmDuration"]));
             }
             set {
                 this["AlarmDuration"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40R|20R|20R;1L OR 20L;1R")]
+        public string AlarmCues {
+            get {
+                return ((string)(this["AlarmCues"]));
+            }
+            set {
+                this["AlarmCues"] = value;
             }
         }
     }
