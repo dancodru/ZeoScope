@@ -50,6 +50,7 @@
             this.Controls.Add(this.splitterPanel);
 
             this.devicePanel.Dock = DockStyle.Fill;
+            this.devicePanel.BackColor = Color.Black;
             this.devicePanel.Location = new System.Drawing.Point(0, 0);
             this.devicePanel.MouseMove += new MouseEventHandler(this.DevicePanel_MouseMove);
             this.devicePanel.MouseClick += new MouseEventHandler(this.DevicePanel_MouseClick);
@@ -74,7 +75,7 @@
             }
             catch (FileNotFoundException ex)
             {
-                throw new ZeoException(ex, "Install DirectX Runtime http://www.microsoft.com/download/en/details.aspx?id=35");
+                throw new ZeoException(ex, "Install DirectX Runtime from http://www.microsoft.com/download/en/details.aspx?id=35");
             }
         }
         #endregion
@@ -538,7 +539,7 @@
             int maxX = this.devicePanel.Width;
             int maxY = this.devicePanel.Height;
 
-            if (this.scopeVerts == null)
+            if (this.scopeVerts == null || this.scopeVerts.Length != this.NumberOfChannels)
             {
                 this.scopeVertsLen = this.ScopeLength;
                 this.scrollBar.LargeChange = (int)(this.scopeVertsLen / this.SamplesPerSecond);
@@ -642,13 +643,13 @@
                 }
 
                 int textLength = this.titleFont.MeasureString(null, this.Title, DrawTextFormat.ExpandTabs, Color.Gray).Width;
-                textX += textLength + 40;
+                textX += textLength + 20;
 
                 // Draw time label
                 if (string.IsNullOrEmpty(this.TimeString) == false)
                 {
                     this.labelFont.DrawText(null, this.TimeString, textX, textY, Color.Gray);
-                    textX += 130;
+                    textX += 90;
                 }
 
                 for (int i = 0; i < this.NumberOfChannels; i++)
@@ -657,7 +658,7 @@
                     {
                         if (this.LabelFormatStrings[i].StartsWith("\t"))
                         {
-                            textX += 50;
+                            textX += 70;
                         }
 
                         this.labelFont.DrawText(null, string.Format(this.LabelFormatStrings[i], this.ScopeData[this.ScopeX].Values[i]),

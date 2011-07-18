@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Zeo Scope")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("ZeoScope")]
+[assembly: AssemblyDescription("ZeoScope")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Zeo Scope")]
-[assembly: AssemblyCopyright("")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("ZeoScope")]
+[assembly: AssemblyProduct("ZeoScope")]
+[assembly: AssemblyCopyright("ZeoScope")]
+[assembly: AssemblyTrademark("ZeoScope")]
 [assembly: AssemblyCulture("")]
 
 // Version information for an assembly consists of the following four values:

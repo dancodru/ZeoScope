@@ -18,34 +18,42 @@
 
     internal class SoundAlarm : IDisposable
     {
-        public static readonly int MinVolume = -5000; // min volume: -10000
-        public static readonly int MaxVolume = 0; // max volume: 0
+        public static readonly int[] Volumes = { -3500, -2000, -1000, -500, 0 };  // 0 - (-10000) range
 
-        private static string regexCue = @"((?<cue>(\d{1,3}[ARLDU];?)+)(?:\s+OR\s+)?)+";
-        private static string regexState = @"((?<state>\d{1,3}[ARLDU]);?)+";
-        private static string parseState = @"(\d{1,3})([ARLDU])";
+        public static int MaxVolume { get; private set; } // max volume: 0
+        public static int MinVolume { get; private set; } // min volume: -10000
+
+        private static string regexCue = @"((?<cue>(\d{1,3}[ARLDSU];?)+)(?:\s+OR\s+)?)+";
+        private static string regexState = @"((?<state>\d{1,3}[ARLDSU]);?)+";
+        private static string parseState = @"(\d{1,3})([ARLDSU])";
 
         private Stopwatch stopWatch;
         private Audio audio;
         private int fadeInSeconds;
         private int fadeOutSeconds;
         private int durationSeconds;
-        private int maxVolume;
         private string fromTime;
         private string toTime;
+        private string snoozeTime;
         
         private List<ZeoSleepStage> sleepStages;
 
         private List<List<AlarmState>> alarmCues;
 
-        public SoundAlarm(string mp3FileName, string fadeInMinutes, string fadeOutMinutes, string durationMinutes, string fromTime, string toTime, string alarmCue)
+        public SoundAlarm(string mp3FileName, string fadeInMinutes, string fadeOutMinutes, 
+            string durationMinutes, string fromTime, string toTime, string snoozeTime, string alarmCue)
         {
             this.fadeInSeconds = (int)TimeSpan.Parse("00:" + fadeInMinutes).TotalSeconds; // 00 hours
             this.fadeOutSeconds = (int)TimeSpan.Parse("00:" + fadeOutMinutes).TotalSeconds; // 00 hours
             this.durationSeconds = (int)TimeSpan.Parse("00:" + durationMinutes).TotalSeconds; // 00 hours
-            this.maxVolume = SoundAlarm.MaxVolume;
             this.fromTime = fromTime;
             this.toTime = toTime;
+            this.snoozeTime = snoozeTime;
+
+            if (string.IsNullOrEmpty(this.fromTime) == true)
+            {
+                this.AlarmEnabled = true;
+            }
 
             this.AlarmStarted = false;
             this.stopWatch = new Stopwatch();
@@ -60,6 +68,14 @@
 
         public bool AlarmStarted { get; set; }
 
+        public bool AlarmEnabled { get; private set; }
+
+        public static void SetVolumes(int v)
+        {
+            SoundAlarm.MaxVolume = SoundAlarm.Volumes[v - 1];
+            SoundAlarm.MinVolume = SoundAlarm.MaxVolume - 3500;
+        }
+
         public static bool ValidateAlarmCue(string alarmCue)
         {
             return Regex.Match(alarmCue, regexCue).Value == alarmCue;
@@ -67,6 +83,19 @@
 
         public ZeoMessage ProcessZeoMessage(ZeoMessage zeoMessage)
         {
+            if (string.IsNullOrEmpty(this.fromTime) == false && DateTime.Now.ToString("HH:mm") == this.fromTime)
+            {
+                this.AlarmEnabled = true;
+            }
+
+            if (string.IsNullOrEmpty(this.toTime) == false && DateTime.Now.ToString("HH:mm") == this.toTime)
+            {
+                this.AlarmEnabled = false;
+                
+                // This will stop the alarm
+                this.AlarmStarted = false;
+            }
+
             if (this.AlarmStarted == true && this.audio.Playing == false)
             {
                 // Called from SettingsForm
@@ -80,6 +109,11 @@
                 this.SetAudioVolume();
                 zeoMessage.SoundAlarmVolume = this.audio.Volume;
                 return zeoMessage;
+            }
+
+            if (this.AlarmEnabled == false)
+            {
+                return null;
             }
 
             if (zeoMessage.SleepStage != null)
@@ -105,7 +139,13 @@
 
                     for (; i >= 0 && i > end; i--)
                     {
-                        if (this.sleepStages[i] != state.SleepStage)
+                        if (state.SleepStage == ZeoSleepStage.Sleep &&
+                            (this.sleepStages[i] != ZeoSleepStage.REM || this.sleepStages[i] != ZeoSleepStage.Light || this.sleepStages[i] != ZeoSleepStage.Deep))
+                        {
+                            startAlarm = false;
+                            break;
+                        }
+                        else if (this.sleepStages[i] != state.SleepStage)
                         {
                             startAlarm = false;
                             break;
@@ -163,6 +203,9 @@
                         case "U":
                             c.SleepStage = ZeoSleepStage.Undefined0;
                             break;
+                        case "S":
+                            c.SleepStage = ZeoSleepStage.Sleep;
+                            break;
                     }
 
                     cue.Add(c);
@@ -193,23 +236,31 @@
                 this.audio.Stop();
                 this.audio.Volume = SoundAlarm.MinVolume;
                 this.AlarmStarted = false;
+
+                // Snooze the alarm for this.snoozeTime minutes
+                if (string.IsNullOrEmpty(this.snoozeTime) == false && TimeSpan.Parse(this.snoozeTime).TotalMinutes ==0)
+                {
+                    this.fromTime = DateTime.Now.Add(TimeSpan.Parse(this.snoozeTime)).ToString("HH:mm");
+                    this.AlarmEnabled = false;
+                }
+
                 return;
             }
 
             if (seconds <= this.fadeInSeconds)
             {
-                this.audio.Volume = (int)(((this.maxVolume - SoundAlarm.MinVolume) * Math.Sqrt(seconds / this.fadeInSeconds)) + SoundAlarm.MinVolume);
+                this.audio.Volume = (int)(((SoundAlarm.MaxVolume - SoundAlarm.MinVolume) * Math.Sqrt(seconds / this.fadeInSeconds)) + SoundAlarm.MinVolume);
             }
             else
             {
                 seconds = this.durationSeconds - seconds;
                 if (seconds > this.fadeOutSeconds)
                 {
-                    this.audio.Volume = this.maxVolume;
+                    this.audio.Volume = SoundAlarm.MaxVolume;
                 }
                 else
                 {
-                    this.audio.Volume = (int)(((this.maxVolume - SoundAlarm.MinVolume) * Math.Sqrt(seconds / this.fadeOutSeconds)) + SoundAlarm.MinVolume);
+                    this.audio.Volume = (int)(((SoundAlarm.MaxVolume - SoundAlarm.MinVolume) * Math.Sqrt(seconds / this.fadeOutSeconds)) + SoundAlarm.MinVolume);
                 }
             }
         }

@@ -77,6 +77,7 @@
             this.eegLevelToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.settingsToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.alarmStateToolStripLabel = new System.Windows.Forms.ToolStripLabel();
             this.freqScopePanel = new ZeoScope.ScopePanel();
             this.stageScopePanel = new ZeoScope.ScopePanel();
             this.eegScopePanel.SuspendLayout();
@@ -93,7 +94,7 @@
             this.splitter.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitter.Location = new System.Drawing.Point(0, 276);
             this.splitter.Name = "splitter";
-            this.splitter.Size = new System.Drawing.Size(784, 3);
+            this.splitter.Size = new System.Drawing.Size(967, 3);
             this.splitter.TabIndex = 15;
             this.splitter.TabStop = false;
             // 
@@ -106,7 +107,7 @@
             this.eegScopePanel.HorizontalLinesCount = 1;
             this.eegScopePanel.LabelFormatStrings = new string[] {
         "\t{0:0.000}mv"};
-            this.eegScopePanel.LabelSpacing = 0;
+            this.eegScopePanel.LabelSpacing = 90;
             this.eegScopePanel.Location = new System.Drawing.Point(0, 0);
             this.eegScopePanel.MaxValueDisplay = null;
             this.eegScopePanel.MinValueDisplay = null;
@@ -117,7 +118,7 @@
             this.eegScopePanel.ScopeX = 95;
             this.eegScopePanel.ScrollBarMaximum = 0;
             this.eegScopePanel.ScrollBarValue = 0;
-            this.eegScopePanel.Size = new System.Drawing.Size(784, 279);
+            this.eegScopePanel.Size = new System.Drawing.Size(967, 279);
             this.eegScopePanel.TabIndex = 0;
             this.eegScopePanel.TimeString = null;
             this.eegScopePanel.Title = "EEG";
@@ -140,10 +141,12 @@
             this.toolStripLabel3,
             this.eegLevelToolStripComboBox,
             this.toolStripSeparator4,
-            this.settingsToolStripButton});
+            this.settingsToolStripButton,
+            this.alarmStateToolStripLabel});
             this.toolStrip.Location = new System.Drawing.Point(0, 0);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(784, 25);
+            this.toolStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.toolStrip.Size = new System.Drawing.Size(967, 25);
             this.toolStrip.TabIndex = 3;
             this.toolStrip.Text = "toolStrip";
             // 
@@ -167,7 +170,7 @@
             this.stopToolStripButton.Name = "stopToolStripButton";
             this.stopToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.stopToolStripButton.Text = "Stop Recording";
-            this.stopToolStripButton.ToolTipText = "Stop Recording (S)";
+            this.stopToolStripButton.ToolTipText = "Stop Recording";
             this.stopToolStripButton.Click += new System.EventHandler(this.StopToolStripButton_Click);
             // 
             // toolStripLabel4
@@ -199,7 +202,7 @@
             this.openToolStripButton.Name = "openToolStripButton";
             this.openToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.openToolStripButton.Text = "Open Zeo File";
-            this.openToolStripButton.ToolTipText = "Open Zeo File (O)";
+            this.openToolStripButton.ToolTipText = "Open Zeo File";
             this.openToolStripButton.Click += new System.EventHandler(this.OpenToolStripButton_Click);
             // 
             // toolStripSeparator2
@@ -272,8 +275,14 @@
             this.settingsToolStripButton.Name = "settingsToolStripButton";
             this.settingsToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.settingsToolStripButton.Text = "Settings";
-            this.settingsToolStripButton.ToolTipText = "Settings (T)";
+            this.settingsToolStripButton.ToolTipText = "Settings";
             this.settingsToolStripButton.Click += new System.EventHandler(this.SettingsToolStripButton_Click);
+            // 
+            // alarmStateToolStripLabel
+            // 
+            this.alarmStateToolStripLabel.Name = "alarmStateToolStripLabel";
+            this.alarmStateToolStripLabel.Size = new System.Drawing.Size(66, 22);
+            this.alarmStateToolStripLabel.Text = "Alarm: OFF";
             // 
             // freqScopePanel
             // 
@@ -281,7 +290,7 @@
             this.freqScopePanel.GraphColors = null;
             this.freqScopePanel.HorizontalLinesCount = 0;
             this.freqScopePanel.LabelFormatStrings = null;
-            this.freqScopePanel.LabelSpacing = 100;
+            this.freqScopePanel.LabelSpacing = 90;
             this.freqScopePanel.Location = new System.Drawing.Point(0, 279);
             this.freqScopePanel.MaxValueDisplay = null;
             this.freqScopePanel.MinValueDisplay = null;
@@ -292,7 +301,7 @@
             this.freqScopePanel.ScopeX = 0;
             this.freqScopePanel.ScrollBarMaximum = 0;
             this.freqScopePanel.ScrollBarValue = 0;
-            this.freqScopePanel.Size = new System.Drawing.Size(784, 100);
+            this.freqScopePanel.Size = new System.Drawing.Size(967, 100);
             this.freqScopePanel.SplitterPanelVisible = false;
             this.freqScopePanel.TabIndex = 3;
             this.freqScopePanel.TimeString = null;
@@ -304,25 +313,29 @@
             // 
             this.stageScopePanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.stageScopePanel.GraphColors = new System.Drawing.Color[] {
-        System.Drawing.Color.Cyan};
+        System.Drawing.Color.Cyan,
+        System.Drawing.Color.Brown};
             this.stageScopePanel.HorizontalLinesCount = 4;
             this.stageScopePanel.LabelFormatStrings = new string[] {
-        "{0}"};
-            this.stageScopePanel.LabelSpacing = 0;
+        "{0}",
+        " "};
+            this.stageScopePanel.LabelSpacing = 90;
             this.stageScopePanel.Location = new System.Drawing.Point(0, 379);
             this.stageScopePanel.MaxValueDisplay = new float[] {
-        0F};
+        0F,
+        2000F};
             this.stageScopePanel.MinValueDisplay = new float[] {
-        -5F};
+        -5F,
+        -9000F};
             this.stageScopePanel.Name = "stageScopePanel";
-            this.stageScopePanel.NumberOfChannels = 1;
+            this.stageScopePanel.NumberOfChannels = 2;
             this.stageScopePanel.SamplesPerSecond = 0.0333D;
             this.stageScopePanel.ScopeData = null;
             this.stageScopePanel.ScopeX = 0;
             this.stageScopePanel.ScrollBarMaximum = 0;
             this.stageScopePanel.ScrollBarValue = 0;
             this.stageScopePanel.ScrollBarVisible = false;
-            this.stageScopePanel.Size = new System.Drawing.Size(784, 183);
+            this.stageScopePanel.Size = new System.Drawing.Size(967, 183);
             this.stageScopePanel.SplitterPanelVisible = false;
             this.stageScopePanel.TabIndex = 5;
             this.stageScopePanel.TimeString = null;
@@ -333,7 +346,7 @@
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(784, 562);
+            this.ClientSize = new System.Drawing.Size(967, 562);
             this.Controls.Add(this.splitter);
             this.Controls.Add(this.eegScopePanel);
             this.Controls.Add(this.freqScopePanel);
@@ -357,5 +370,7 @@
         }
 
         #endregion
+
+        private ToolStripLabel alarmStateToolStripLabel;
     }
 }

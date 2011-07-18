@@ -26,12 +26,12 @@ namespace ZeoScope {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool LucidAlarmEnabled {
+        public bool AlarmEnabled {
             get {
-                return ((bool)(this["LucidAlarmEnabled"]));
+                return ((bool)(this["AlarmEnabled"]));
             }
             set {
-                this["LucidAlarmEnabled"] = value;
+                this["AlarmEnabled"] = value;
             }
         }
         
@@ -49,7 +49,7 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("BrownNoise10min.mp3")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string MP3FileName {
             get {
                 return ((string)(this["MP3FileName"]));
@@ -212,6 +212,30 @@ namespace ZeoScope {
             }
             set {
                 this["AlarmCues"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("00:30")]
+        public string AlarmSnooze {
+            get {
+                return ((string)(this["AlarmSnooze"]));
+            }
+            set {
+                this["AlarmSnooze"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int MaxVolume {
+            get {
+                return ((int)(this["MaxVolume"]));
+            }
+            set {
+                this["MaxVolume"] = value;
             }
         }
     }

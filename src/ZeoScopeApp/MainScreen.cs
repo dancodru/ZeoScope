@@ -16,6 +16,9 @@ namespace ZeoScope
     internal partial class MainScreen : Form
     {
         #region Privates
+        private readonly string alarmOnString = "Alarm: ON";
+        private readonly string alarmOffString = string.Empty;
+
         private string fileName;
 
         private ManualResetEvent exitEvent = new ManualResetEvent(false);
@@ -66,9 +69,9 @@ namespace ZeoScope
                 if (time != null)
                 {
                     time.Value.AddSeconds(this.eegScopePanel.ScopeX / ZeoStream.SamplesPerSec);
-                    this.eegScopePanel.TimeString = string.Format("t: {0}  +{1:0.000}s", time.Value.ToString("HH:mm:ss"), (double)this.eegScopePanel.ScopeX / ZeoMessage.SamplesPerMessage);
-                    this.freqScopePanel.TimeString = string.Format("t: {0}", time.Value.ToString("HH:mm:ss"));
-                    this.stageScopePanel.TimeString = string.Format("t: {0}", time.Value.AddSeconds(2).ToString("HH:mm:ss")); // TODO: fix AddSeconds(2)
+                    this.eegScopePanel.TimeString = string.Format("{0}  +{1:0.000}s", time.Value.ToString("HH:mm:ss"), (double)this.eegScopePanel.ScopeX / ZeoMessage.SamplesPerMessage);
+                    this.freqScopePanel.TimeString = string.Format("{0}", time.Value.ToString("HH:mm:ss"));
+                    this.stageScopePanel.TimeString = string.Format("{0}", time.Value.AddSeconds(2).ToString("HH:mm:ss")); // TODO: fix AddSeconds(2)
                 }
 
                 if (this.stageScopePanel.ScopeX < this.stageScopePanel.ScopeData.Length)
@@ -159,10 +162,20 @@ namespace ZeoScope
             this.zeoStream = new ZeoStream(this.exitEvent);
             this.zeoStream.HeadbandDocked += new EventHandler(this.ZeoStream_HeadbandDocked);
 
-            if (ZeoSettings.Default.LucidAlarmEnabled == true && File.Exists(ZeoSettings.Default.MP3FileName) == true)
+            if (ZeoSettings.Default.AlarmEnabled == true && File.Exists(ZeoSettings.Default.MP3FileName) == true)
             {
-                this.soundAlarm = new SoundAlarm(ZeoSettings.Default.MP3FileName, ZeoSettings.Default.AlarmFadeIn, ZeoSettings.Default.AlarmFadeOut,
-                    ZeoSettings.Default.AlarmDuration, ZeoSettings.Default.AlarmFromTime, ZeoSettings.Default.AlarmToTime, ZeoSettings.Default.AlarmCue);
+                this.soundAlarm = new SoundAlarm(ZeoSettings.Default.MP3FileName, ZeoSettings.Default.AlarmFadeIn,
+                    ZeoSettings.Default.AlarmFadeOut, ZeoSettings.Default.AlarmDuration, ZeoSettings.Default.AlarmFromTime,
+                    ZeoSettings.Default.AlarmToTime, ZeoSettings.Default.AlarmSnooze, ZeoSettings.Default.AlarmCue);
+
+                // Add one more channel for Alarm sound volume
+                this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2;
+                this.freqScopePanel.MaxValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MaxVolume + 2000;
+                this.freqScopePanel.MinValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MinVolume - 200;
+            }
+            else
+            {
+                this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 1;
             }
 
             this.zeoStream.OpenLiveStream(this.comPortToolStripComboBox.Text, this.fileNameToolStripComboBox.Text, this.soundAlarm);
@@ -291,13 +304,15 @@ namespace ZeoScope
             settingsForm.ShowDialog(this);
             settingsForm.Dispose();
 
-            if (ZeoSettings.Default.LucidAlarmEnabled == true)
+            if (ZeoSettings.Default.AlarmEnabled == true)
             {
-                this.settingsToolStripButton.BackColor = Color.FromArgb(200, 255, 180);
+                this.alarmStateToolStripLabel.Text = this.alarmOnString;
+                this.alarmStateToolStripLabel.ForeColor = Color.DarkGreen;
             }
             else
             {
-                this.settingsToolStripButton.BackColor = SystemColors.Control;
+                this.alarmStateToolStripLabel.Text = this.alarmOffString;
+                this.alarmStateToolStripLabel.ForeColor = SystemColors.ControlText;
             }
         }
 
@@ -327,38 +342,6 @@ namespace ZeoScope
                         break;
                     }
 
-                case 'o':
-                case 'O':
-                    {
-                        if (this.openToolStripButton.Enabled == true)
-                        {
-                            this.OpenToolStripButton_Click(this.openToolStripButton, null);
-                        }
-
-                        break;
-                    }
-
-                case 's':
-                case 'S':
-                    {
-                        if (this.stopToolStripButton.Enabled == true)
-                        {
-                            this.StopToolStripButton_Click(this.stopToolStripButton, null);
-                        }
-
-                        break;
-                    }
-
-                case 't':
-                case 'T':
-                    {
-                        if (this.settingsToolStripButton.Enabled == true)
-                        {
-                            this.SettingsToolStripButton_Click(this.settingsToolStripButton, null);
-                        }
-
-                        break;
-                    }
                 default:
                     break;
             }
@@ -372,23 +355,6 @@ namespace ZeoScope
 
             this.timer = new Stopwatch();
 
-            this.comPortToolStripComboBox.Items.Clear();
-
-            // TODO: this takes a lot of time, need to create a thread/delegate here
-            this.comPortToolStripComboBox.Items.AddRange(Ftdi.GetComPortList());
-            if (this.comPortToolStripComboBox.Items.Count == 0)
-            {
-                // if no FTDI ports exist, add all existing COM ports
-                List<string> ports = new List<string>(SerialPort.GetPortNames());
-                ports.Sort();
-                this.comPortToolStripComboBox.Items.AddRange(ports.ToArray());
-            }
-
-            if (this.comPortToolStripComboBox.Items.Count > ZeoSettings.Default.ComPortSelectedIndex)
-            {
-                this.comPortToolStripComboBox.SelectedIndex = ZeoSettings.Default.ComPortSelectedIndex;
-            }
-
             this.eegLevelToolStripComboBox.SelectedIndex = ZeoSettings.Default.EegLevelSelecteIndex;
             float eegLevel;
             float.TryParse(this.eegLevelToolStripComboBox.Text, out eegLevel);
@@ -401,28 +367,65 @@ namespace ZeoScope
                 this.fileNameToolStripComboBox.SelectedIndex = 0;
             }
 
+            SoundAlarm.SetVolumes(ZeoSettings.Default.MaxVolume);
+
             this.freqScopePanel.SamplesPerSecond = 1.0;
-            this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2;
-            this.freqScopePanel.MaxValueDisplay = new float[] { 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 3.0f, 1500.0f, 4000 };
+            this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2; // Include Impedance and Sound Alarm Volume
+            this.freqScopePanel.MaxValueDisplay = new float[] { 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 2.0f, 1500.0f, SoundAlarm.MaxVolume + 2000 };
             this.freqScopePanel.MinValueDisplay = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, SoundAlarm.MinVolume - 200 };
             this.freqScopePanel.GraphColors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Cyan, Color.Magenta, Color.Yellow, Color.Coral, Color.FromArgb(80, 80, 80), Color.Brown };
-            this.freqScopePanel.LabelFormatStrings = new string[] { "D: {0:0.00}", "T: {0:0.00}", "A: {0:0.00}", "B1: {0:0.00}", "B2: {0:0.00}", "B3: {0:0.00}", "G: {0:0.00}", "Imp: {0:0.0}", "V: {0}" };
+            this.freqScopePanel.LabelFormatStrings = new string[] { "D: {0:0.00}", "T: {0:0.00}", "A: {0:0.00}", "B1: {0:0.00}", "B2: {0:0.00}", "B3: {0:0.00}", "G: {0:0.00}", "Im: {0:0.0}", "V: {0}" };
             this.freqScopePanel.HorizontalLinesCount = 0;
 
             // Restore from ZeoSettings
-            this.comPortToolStripComboBox.SelectedIndex = ZeoSettings.Default.ComPortSelectedIndex;
             this.eegLevelToolStripComboBox.SelectedIndex = ZeoSettings.Default.EegLevelSelecteIndex;
             this.WindowState = ZeoSettings.Default.WindowMaximized == true ? FormWindowState.Maximized : FormWindowState.Normal;
             this.Height = ZeoSettings.Default.WindowHeight;
             this.Width = ZeoSettings.Default.WindowWidth;
             this.freqScopePanel.Height = ZeoSettings.Default.FreqPanelHeight;
 
-            if (ZeoSettings.Default.LucidAlarmEnabled == true)
+            if (ZeoSettings.Default.AlarmEnabled == true)
             {
-                this.settingsToolStripButton.BackColor = Color.FromArgb(200, 255, 180);
+                this.alarmStateToolStripLabel.Text = this.alarmOnString;
+                this.alarmStateToolStripLabel.ForeColor = Color.DarkGreen;
+            }
+            else
+            {
+                this.alarmStateToolStripLabel.Text = this.alarmOffString;
+                this.alarmStateToolStripLabel.ForeColor = SystemColors.ControlText;
             }
 
             this.LoadFileNames();
+
+            Action<object> comPortsDetect = delegate(object obj)
+            {
+                Thread.Sleep(50); // sleep to make sure the form is created
+                string[] comPorts = Ftdi.GetComPortList();
+                this.Invoke(new Action<string[]>(this.ComPortsComboBoxItemsAdd), new object[] { comPorts });
+            };
+
+            comPortsDetect.BeginInvoke(null, null, null);
+        }
+
+        private void ComPortsComboBoxItemsAdd(object obj)
+        {
+            this.comPortToolStripComboBox.Items.Clear();
+            
+            string[] comPorts = (string[])obj;
+            this.comPortToolStripComboBox.Items.AddRange(comPorts);
+
+            if (comPorts.Length == 0)
+            {
+                // if no FTDI ports exist, add all existing COM ports
+                List<string> ports = new List<string>(SerialPort.GetPortNames());
+                ports.Sort();
+                this.comPortToolStripComboBox.Items.AddRange(ports.ToArray());
+            }
+
+            if (this.comPortToolStripComboBox.Items.Count > ZeoSettings.Default.ComPortSelectedIndex)
+            {
+                this.comPortToolStripComboBox.SelectedIndex = ZeoSettings.Default.ComPortSelectedIndex;
+            }
         }
 
         private void LoadFileNames()
@@ -532,6 +535,18 @@ namespace ZeoScope
                 this.stageScopePanel.ScopeData = null;
                 MessageBox.Show(ex.Message);
                 return;
+            }
+
+            if (this.zeoStream.SoundAlarmEnabled == true)
+            {
+                // Add one more channel for Alarm sound volume
+                this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2;
+                this.freqScopePanel.MaxValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MaxVolume + 2000;
+                this.freqScopePanel.MinValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MinVolume - 200;
+            }
+            else
+            {
+                this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 1;
             }
 
             this.eegScopePanel.ScrollBarMaximum = this.zeoStream.Length;

@@ -2,14 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ZeoScope" GeneratedClassName="ZeoSettings">
   <Profiles />
   <Settings>
-    <Setting Name="LucidAlarmEnabled" Type="System.Boolean" Scope="User">
+    <Setting Name="AlarmEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="ComPortSelectedIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="MP3FileName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">BrownNoise10min.mp3</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="AlarmCue" Type="System.String" Scope="User">
       <Value Profile="(Default)">40R</Value>
@@ -49,6 +49,12 @@
     </Setting>
     <Setting Name="AlarmCues" Type="System.String" Scope="User">
       <Value Profile="(Default)">40R|20R|20R;1L OR 20L;1R</Value>
+    </Setting>
+    <Setting Name="AlarmSnooze" Type="System.String" Scope="User">
+      <Value Profile="(Default)">00:30</Value>
+    </Setting>
+    <Setting Name="MaxVolume" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5</Value>
     </Setting>
   </Settings>
 </SettingsFile>

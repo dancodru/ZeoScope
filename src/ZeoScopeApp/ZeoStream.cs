@@ -44,6 +44,7 @@ namespace ZeoScope
         Light = 3,
         Deep = 4,
         Undefined = 5,
+        Sleep = 6,  // REM || Light || Deep
     }
 
     internal enum ZeoEvent
@@ -78,9 +79,11 @@ namespace ZeoScope
 
         public static readonly int FrequencyBinsLength = 7;
 
+        public static readonly int MinSoundVolume = -10000;
+
         public ZeoMessage()
         {
-            this.SoundAlarmVolume = -10000;
+            this.SoundAlarmVolume = ZeoMessage.MinSoundVolume;
         }
 
         public float[] Waveform { get; set; }
@@ -160,7 +163,8 @@ namespace ZeoScope
         public static readonly double SamplesPerSec = 128.0;
         public static readonly int SleepStageSeconds = 30;
 
-        private static string versionFormat = "ZeoVersion: {0:00}.{1:00}.{2:0000}.{3:0000}";
+        private static string versionHeader = "ZeoVersion";
+        private static string versionFormat = versionHeader + ": {0:00}.{1:00}.{2:0000}.{3:0000}";
 
         private static string[] supportedVersions = new string[] {
             string.Empty, // old version (no version string)
@@ -249,10 +253,19 @@ namespace ZeoScope
             this.fileName = fileName;
 
             this.binFile = new FileStream(this.fileName, FileMode.Open);
-            this.CheckVersionString();
+            this.VerifyVersionString();
 
             try
             {
+                while (true)
+                {
+                    ZeoMessage zeoMessage = this.ReadMessage();
+                    if (zeoMessage != null && zeoMessage.Waveform != null)
+                    {
+                        break;
+                    }
+                }
+
                 while (true)
                 {
                     ZeoMessage zeoMessage = this.ReadMessage();
@@ -330,10 +343,11 @@ namespace ZeoScope
             for (int i = lastPosition, j = 0; j < len && i < this.zeoMessages.Count; i++)
             {
                 ZeoMessage zeoMessage = this.zeoMessages[i];
-                stageData[j] = new ChannelData(1);
+                stageData[j] = new ChannelData(2);
                 if (zeoMessage.SleepStage != null)
                 {
                     stageData[j].Values[0] = -(int)zeoMessage.SleepStage;
+                    stageData[j].Values[1] = zeoMessage.SoundAlarmVolume;
                     j++;
                 }
             }
@@ -342,12 +356,14 @@ namespace ZeoScope
             {
                 if (stageData[i] == null)
                 {
-                    stageData[i] = new ChannelData(1);
+                    stageData[i] = new ChannelData(2);
                     stageData[i].Values[0] = -5;
+                    stageData[i].Values[1] = ZeoMessage.MinSoundVolume;
                 }
                 else if (stageData[i].Values[0] == 0)
                 {
                     stageData[i].Values[0] = -5;
+                    stageData[i].Values[1] = ZeoMessage.MinSoundVolume;
                 }
             }
 
@@ -539,7 +555,7 @@ namespace ZeoScope
             this.binFile.Write(bytes, 0, bytes.Length);
         }
 
-        private void CheckVersionString()
+        private void VerifyVersionString()
         {
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
             string currentVersionString = string.Format(ZeoStream.versionFormat, version.Major, version.Minor, version.Build, version.Revision);
@@ -548,7 +564,7 @@ namespace ZeoScope
             this.binFile.Read(bytes, 0, bytes.Length);
 
             string fileVersion = ASCIIEncoding.ASCII.GetString(bytes);
-            if (fileVersion.StartsWith("A4") == true)
+            if (fileVersion.StartsWith(ZeoStream.versionHeader) == false)
             {
                 // Old file types
                 fileVersion = string.Empty;
