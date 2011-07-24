@@ -6,28 +6,32 @@ ZeoScope is a biofeedback application based on Zeo Raw Data Library http://blog.
 Features
 ========
 
-* **Lucid Dream Sound Alarm** including support of Bluetooth speaker/headsets
+* **Lucid Dream Sound Alarm** including support of Bluetooth speakers/headsets
 * Recording Zeo full sleep sessions
 * Displaying Zeo saved sessions
 * Simultaneous display of EEG signal, Frequency bins and Sleep Stage graphs. These three graphs are synchronized between each other
 * Automatic detection of FTDI devices used to connect to Zeo port
 
-The folowing functionality is supported when using Bluetoot Bluetooth speaker/headsets:
+The following functionality is supported when using Bluetooth speakers/headsets:
 
 * Stop playing Sound Alarm by pressing **Play/Pause**, **Next Track**, **Previous Track** buttons
 * Start/Stop Sleep Data recording when pressing **Play/Pause** button
 
-Next feature list planned for near future:
+Tested Bluetooth speakers/headsets: 
+* [Satechi BT Speaker][]
+* [Motorola S305 Wireless Stereo Headphones][]
 
-* Dream eye movement detection for controlling Dream Alarm and recording Lucid Dreams
-* Custom Lucid dream alert using bluetooth bracelet
+Feature list planned for near future:
+
+* Eye movement detection for controlling Dream Alarm and recording Lucid Dreams
+* Custom Lucid dream alert using Bluetooth bracelet
 
 Downloads
 =========
 
 You can download the executable at:
 
-* http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
+* [ZeoScope.0.9.1.0.zip][http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip]
 
 It requires DirectX Runtime that can be installed from:
 
@@ -39,6 +43,8 @@ Screenshots
 Viewing Sleep Data
 ------------------
 
+(Sleep spindle in background)
+
 [![](https://lh3.googleusercontent.com/-gzP14WNrOPc/Tiuvw91cDoI/AAAAAAAAABI/VIvUip4ck3A/s800/ZeoScope.JPG)]()
 
 Alarm settings page
@@ -46,7 +52,10 @@ Alarm settings page
 
 [![](https://lh4.googleusercontent.com/-NNYcvBmpOr4/TiuyGaBH69I/AAAAAAAAABY/-ENxsRR45mo/s800/ZeoScopeSettings.jpg)]()
 
-Alarm Sound details
+Alarm Sound description
 -------------------
 
 [![](https://lh6.googleusercontent.com/-6ObYZaMK8m8/Tiu4ocdBDHI/AAAAAAAAABs/tuDajQHs4lU/s800/AlarmSound.jpg)]()
+
+[Satechi BT Speaker]: http://www.satechi.net/index.php/ipad-iphone/speakers-1/satechi-bt-speaker
+[Motorola S305 Wireless Stereo Headphones]: http://www.motorola.com/Consumers/US-EN/Consumer-Product-and-Services/Bluetooth-Headsets/MOTOROKR-S305-Wireless-Stereo-Headphones-US-EN
