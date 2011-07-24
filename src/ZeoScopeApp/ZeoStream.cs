@@ -220,7 +220,6 @@ namespace ZeoScope
         public bool LiveStream { get; private set; }
 
         public bool SoundAlarmEnabled { get; private set; }
-
         #endregion
 
         #region Public Methods
@@ -927,15 +926,11 @@ namespace ZeoScope
             // 50Hz Filter based on http://blog.myzeo.com/zeo-raw-data-library-free-your-mind/
             // Convolution math based on http://www.phys.uu.nl/~haque/computing/WPark_recipes_in_python.html
             float[] filter = { 
-                                 0.0056f, 0.0190f, 0.0113f, -0.0106f, 0.0029f, 0.0041f,
-                                 -0.0082f, 0.0089f, -0.0062f, 0.0006f, 0.0066f, -0.0129f,
-                                 0.0157f, -0.0127f, 0.0035f, 0.0102f, -0.0244f, 0.0336f,
-                                 -0.0323f, 0.0168f, 0.0136f, -0.0555f, 0.1020f, -0.1446f,
-                                 0.1743f, 0.8150f, 0.1743f, -0.1446f, 0.1020f, -0.0555f,
-                                 0.0136f, 0.0168f, -0.0323f, 0.0336f, -0.0244f, 0.0102f,
-                                 0.0035f, -0.0127f, 0.0157f, -0.0129f, 0.0066f, 0.0006f,
-                                 -0.0062f, 0.0089f, -0.0082f, 0.0041f, 0.0029f, -0.0106f,
-                                 0.0113f, 0.0190f, 0.0056f 
+                0.0032f, 0.0063f, -0.0088f, -0.0000f, 0.0100f, -0.0082f, -0.0047f, 0.0132f, -0.0054f, -0.0108f, 0.0151f, 0.0000f, 
+                -0.0177f, 0.0147f, 0.0087f, -0.0248f, 0.0105f, 0.0215f, -0.0315f, -0.0000f, 0.0411f, -0.0369f, -0.0241f, 0.0790f, 
+                -0.0404f, -0.1123f, 0.2939f, 0.6250f, 0.2939f, -0.1123f, -0.0404f, 0.0790f, -0.0241f, -0.0369f, 0.0411f, -0.0000f, 
+                -0.0315f, 0.0215f, 0.0105f, -0.0248f, 0.0087f, 0.0147f, -0.0177f, 0.0000f, 0.0151f, -0.0108f, -0.0054f, 0.0132f, 
+                -0.0047f, -0.0082f, 0.0100f                             
                              };
 
             int filterLen = filter.Length;

@@ -171,11 +171,13 @@
       <HintPath>%WINDIR%\Microsoft.NET\Managed DirectX\v9.05.132\Microsoft.DirectX.Direct3DX.dll</HintPath>
       <AssemblyFolderKey>hklm\current managed directx 9.3</AssemblyFolderKey>
     </Reference>
+    <Reference Include="SlimDX, Version=2.0.11.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\SlimDX SDK (March 2011)\Bin\net20\x86\SlimDX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
-    </Reference>
-    <Reference Include="System.Data">
-      <Name>System.Data</Name>
     </Reference>
     <Reference Include="System.Drawing">
       <Name>System.Drawing</Name>

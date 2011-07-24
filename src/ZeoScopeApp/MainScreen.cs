@@ -321,7 +321,7 @@ namespace ZeoScope
 
         private void MainScreen_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Stop the allarm if any key is ressed
+            // Stop the allarm if any key is pressed
             if (this.soundAlarm != null && this.soundAlarm.AlarmStarted == true)
             {
                 this.soundAlarm.AlarmStarted = false;
@@ -347,6 +347,43 @@ namespace ZeoScope
 
                 default:
                     break;
+            }
+        }
+
+        private void BluetoothSpeaker_RawInput(object sender, SlimDX.RawInput.RawInputEventArgs e)
+        {
+            if (e != null && e.RawData != null & e.RawData.Length == 5)
+            {
+                // Second byte value from RawData:
+                // 181 Scan Next Track
+                // 182 Scan Previous Track
+                // 205 Play/Pause
+                byte keyPressed = e.RawData[1];
+
+                if (keyPressed == 181 || keyPressed == 182 || keyPressed == 205)
+                {
+                    // Stop the allarm if any key is pressed
+                    if (this.soundAlarm != null && this.soundAlarm.AlarmStarted == true)
+                    {
+                        this.soundAlarm.AlarmStarted = false;
+                        return;
+                    }
+                }
+
+                if (keyPressed == 205)
+                {
+                    if (this.startToolStripButton.Enabled == true)
+                    {
+                        this.StartToolStripButton_Click(this, null);
+                        return;
+                    }
+
+                    if (this.stopToolStripButton.Enabled == true)
+                    {
+                        this.StopToolStripButton_Click(this, null);
+                        return;
+                    }
+                }
             }
         }
         #endregion
@@ -407,7 +444,15 @@ namespace ZeoScope
                 this.Invoke(new Action<string[]>(this.ComPortsComboBoxItemsAdd), new object[] { comPorts });
             };
 
+            this.InitBluetoothSpeaker();
+
             comPortsDetect.BeginInvoke(null, null, null);
+        }
+
+        private void InitBluetoothSpeaker()
+        {
+            SlimDX.RawInput.Device.RegisterDevice(SlimDX.Multimedia.UsagePage.Consumer, SlimDX.Multimedia.UsageId.TelephonyPhone, SlimDX.RawInput.DeviceFlags.InputSink, this.Handle);
+            SlimDX.RawInput.Device.RawInput += new EventHandler<SlimDX.RawInput.RawInputEventArgs>(BluetoothSpeaker_RawInput);
         }
 
         private void ComPortsComboBoxItemsAdd(object obj)

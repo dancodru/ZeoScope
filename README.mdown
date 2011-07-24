@@ -6,14 +6,15 @@ ZeoScope is a biofeedback application based on Zeo Raw Data Library http://blog.
 Features
 ========
 
+* **Lucid Dream Sound Alarm**
 * Recording Zeo full sleep sessions
 * Displaying Zeo saved sessions
 * Simultaneous display of EEG signal, Frequency bins and Sleep Stage graphs. These three graphs are synchronized between each other
 * Automatic detection of FTDI devices used to connect to Zeo port
 
-Next features list planned for immediate future:
+Next features list planned for near future:
 
-* Custom Lucid dream alert using WAV files
+* Dream eye movement detection for controlling Dream Alarm and recording Lucid Dreams
 * Custom Lucid dream alert using bluetooth bracelet
 
 Downloads
@@ -21,7 +22,7 @@ Downloads
 
 You can download the executable at:
 
-* http://github.com/downloads/dancodru/ZeoScope/ZeoScope.zip
+* http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
 
 It requires DirectX Runtime that can be installed from:
 
@@ -29,5 +30,18 @@ It requires DirectX Runtime that can be installed from:
 
 Screenshots
 ===========
- 
-[![](http://farm7.static.flickr.com/6049/5883936252_a7e8fe2155_b_d.jpg)]()
+
+Viewing Sleep Data
+------------------
+
+[![](https://lh3.googleusercontent.com/-gzP14WNrOPc/Tiuvw91cDoI/AAAAAAAAABI/VIvUip4ck3A/s800/ZeoScope.JPG)]()
+
+Lucid Dream Sound Alarm settings page
+-------------------------------------
+
+[![](https://lh4.googleusercontent.com/-NNYcvBmpOr4/TiuyGaBH69I/AAAAAAAAABY/-ENxsRR45mo/s800/ZeoScopeSettings.jpg)]()
+
+Alarm Sound details
+-------------------
+
+[![](https://lh6.googleusercontent.com/-6ObYZaMK8m8/Tiu4ocdBDHI/AAAAAAAAABs/tuDajQHs4lU/s800/AlarmSound.jpg)]()

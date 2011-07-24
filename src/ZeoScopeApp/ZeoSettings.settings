@@ -54,7 +54,7 @@
       <Value Profile="(Default)">00:30</Value>
     </Setting>
     <Setting Name="MaxVolume" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">4</Value>
+      <Value Profile="(Default)">3</Value>
     </Setting>
   </Settings>
 </SettingsFile>
