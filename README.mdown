@@ -17,7 +17,8 @@ The following functionality is supported when using Bluetooth speakers/headsets:
 * Stop playing Sound Alarm by pressing **Play/Pause**, **Next Track**, **Previous Track** buttons
 * Start/Stop Sleep Data recording when pressing **Play/Pause** button
 
-Tested Bluetooth speakers/headsets: 
+Tested Bluetooth speakers/headsets:
+
 * [Satechi BT Speaker][]
 * [Motorola S305 Wireless Stereo Headphones][]
 
@@ -31,7 +32,7 @@ Downloads
 
 You can download the executable at:
 
-* [ZeoScope.0.9.1.0.zip][http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip]
+* http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
 
 It requires DirectX Runtime that can be installed from:
 
