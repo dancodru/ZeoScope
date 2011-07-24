@@ -11,7 +11,6 @@
         private System.Windows.Forms.TextBox toTimeTextBox;
         private System.Windows.Forms.TextBox fromTimeTextBox;
         private System.Windows.Forms.CheckBox enableAlarmCheckBox;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox alarmCueComboBox;
         private System.Windows.Forms.TextBox durationTextBox;
         private System.Windows.Forms.Label label10;
@@ -66,6 +65,7 @@
         private void InitializeComponent()
         {
             this.lucidAlarmGroupBox = new System.Windows.Forms.GroupBox();
+            this.restoreButton = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.alarmCueComboBox = new System.Windows.Forms.ComboBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -92,7 +92,6 @@
             this.durationTextBox = new System.Windows.Forms.TextBox();
             this.mp3FileDialog = new System.Windows.Forms.OpenFileDialog();
             this.enableAlarmCheckBox = new System.Windows.Forms.CheckBox();
-            this.label7 = new System.Windows.Forms.Label();
             this.okButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.lucidAlarmGroupBox.SuspendLayout();
@@ -103,6 +102,7 @@
             // 
             // lucidAlarmGroupBox
             // 
+            this.lucidAlarmGroupBox.Controls.Add(this.restoreButton);
             this.lucidAlarmGroupBox.Controls.Add(this.label2);
             this.lucidAlarmGroupBox.Controls.Add(this.alarmCueComboBox);
             this.lucidAlarmGroupBox.Controls.Add(this.groupBox3);
@@ -110,10 +110,20 @@
             this.lucidAlarmGroupBox.Controls.Add(this.groupBox1);
             this.lucidAlarmGroupBox.Location = new System.Drawing.Point(12, 37);
             this.lucidAlarmGroupBox.Name = "lucidAlarmGroupBox";
-            this.lucidAlarmGroupBox.Size = new System.Drawing.Size(368, 381);
-            this.lucidAlarmGroupBox.TabIndex = 0;
+            this.lucidAlarmGroupBox.Size = new System.Drawing.Size(368, 411);
+            this.lucidAlarmGroupBox.TabIndex = 1;
             this.lucidAlarmGroupBox.TabStop = false;
             this.lucidAlarmGroupBox.Text = "Lucid Alarm";
+            // 
+            // restoreButton
+            // 
+            this.restoreButton.Location = new System.Drawing.Point(12, 377);
+            this.restoreButton.Name = "restoreButton";
+            this.restoreButton.Size = new System.Drawing.Size(154, 23);
+            this.restoreButton.TabIndex = 4;
+            this.restoreButton.Text = "Restore Default Settings";
+            this.restoreButton.UseVisualStyleBackColor = true;
+            this.restoreButton.Click += new System.EventHandler(this.RestoreButton_Click);
             // 
             // label2
             // 
@@ -131,8 +141,8 @@
             this.alarmCueComboBox.Location = new System.Drawing.Point(76, 350);
             this.alarmCueComboBox.MaxLength = 50;
             this.alarmCueComboBox.Name = "alarmCueComboBox";
-            this.alarmCueComboBox.Size = new System.Drawing.Size(276, 21);
-            this.alarmCueComboBox.TabIndex = 21;
+            this.alarmCueComboBox.Size = new System.Drawing.Size(211, 21);
+            this.alarmCueComboBox.TabIndex = 3;
             // 
             // groupBox3
             // 
@@ -141,7 +151,7 @@
             this.groupBox3.Location = new System.Drawing.Point(6, 19);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(352, 53);
-            this.groupBox3.TabIndex = 1;
+            this.groupBox3.TabIndex = 0;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "MP3 File";
             // 
@@ -177,7 +187,7 @@
             this.groupBox2.Location = new System.Drawing.Point(6, 208);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(352, 136);
-            this.groupBox2.TabIndex = 3;
+            this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Alarm Enabled Time Range";
             // 
@@ -255,7 +265,7 @@
             this.groupBox1.Location = new System.Drawing.Point(6, 78);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(352, 124);
-            this.groupBox1.TabIndex = 2;
+            this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Sound duration and fade";
             // 
@@ -272,7 +282,7 @@
             this.maxVolumeComboBox.Location = new System.Drawing.Point(254, 17);
             this.maxVolumeComboBox.Name = "maxVolumeComboBox";
             this.maxVolumeComboBox.Size = new System.Drawing.Size(35, 21);
-            this.maxVolumeComboBox.TabIndex = 8;
+            this.maxVolumeComboBox.TabIndex = 3;
             // 
             // label6
             // 
@@ -306,7 +316,7 @@
             this.alarmPreviewButton.Location = new System.Drawing.Point(254, 90);
             this.alarmPreviewButton.Name = "alarmPreviewButton";
             this.alarmPreviewButton.Size = new System.Drawing.Size(92, 23);
-            this.alarmPreviewButton.TabIndex = 3;
+            this.alarmPreviewButton.TabIndex = 4;
             this.alarmPreviewButton.Text = "Alarm Preview";
             this.alarmPreviewButton.UseVisualStyleBackColor = true;
             this.alarmPreviewButton.Click += new System.EventHandler(this.AlarmPreviewButton_Click);
@@ -362,29 +372,18 @@
             this.enableAlarmCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.enableAlarmCheckBox.Location = new System.Drawing.Point(22, 13);
             this.enableAlarmCheckBox.Name = "enableAlarmCheckBox";
-            this.enableAlarmCheckBox.Size = new System.Drawing.Size(88, 17);
+            this.enableAlarmCheckBox.Size = new System.Drawing.Size(149, 17);
             this.enableAlarmCheckBox.TabIndex = 0;
-            this.enableAlarmCheckBox.Text = "Enable Alarm";
+            this.enableAlarmCheckBox.Text = "Enable Sleep Stage Alarm";
             this.enableAlarmCheckBox.UseVisualStyleBackColor = true;
             this.enableAlarmCheckBox.CheckedChanged += new System.EventHandler(this.EnableLucidAlarmCheckBox_CheckedChanged);
             // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.ForeColor = System.Drawing.Color.Red;
-            this.label7.Location = new System.Drawing.Point(9, 429);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(196, 13);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "Warning: Do Not use as an actual alarm";
-            // 
             // okButton
             // 
-            this.okButton.Location = new System.Drawing.Point(224, 424);
+            this.okButton.Location = new System.Drawing.Point(224, 454);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
-            this.okButton.TabIndex = 1;
+            this.okButton.TabIndex = 2;
             this.okButton.Text = "OK";
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.OkButton_Click);
@@ -392,10 +391,10 @@
             // cancelButton
             // 
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(305, 424);
+            this.cancelButton.Location = new System.Drawing.Point(305, 454);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 2;
+            this.cancelButton.TabIndex = 3;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
             // 
@@ -405,10 +404,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(389, 459);
+            this.ClientSize = new System.Drawing.Size(389, 486);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.label7);
             this.Controls.Add(this.enableAlarmCheckBox);
             this.Controls.Add(this.lucidAlarmGroupBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -444,5 +442,6 @@
         private System.Windows.Forms.TextBox snoozeTextBox;
         private System.Windows.Forms.ComboBox maxVolumeComboBox;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button restoreButton;
     }
 }

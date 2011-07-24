@@ -18,7 +18,7 @@
 
     internal class SoundAlarm : IDisposable
     {
-        public static readonly int[] Volumes = { -3500, -2000, -1000, -500, 0 };  // 0 - (-10000) range
+        public static readonly int[] Volumes = { -4000, -2500, -1200, -600, 0 };  // 0 - (-10000) range
 
         public static int MaxVolume { get; private set; } // max volume: 0
         public static int MinVolume { get; private set; } // min volume: -10000

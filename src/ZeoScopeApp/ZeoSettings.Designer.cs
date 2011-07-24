@@ -193,7 +193,7 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("02:00")]
+        [global::System.Configuration.DefaultSettingValueAttribute("04:00")]
         public string AlarmDuration {
             get {
                 return ((string)(this["AlarmDuration"]));
@@ -229,7 +229,7 @@ namespace ZeoScope {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
         public int MaxVolume {
             get {
                 return ((int)(this["MaxVolume"]));

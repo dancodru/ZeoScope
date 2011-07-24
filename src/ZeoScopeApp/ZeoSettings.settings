@@ -45,7 +45,7 @@
       <Value Profile="(Default)">00:30</Value>
     </Setting>
     <Setting Name="AlarmDuration" Type="System.String" Scope="User">
-      <Value Profile="(Default)">02:00</Value>
+      <Value Profile="(Default)">04:00</Value>
     </Setting>
     <Setting Name="AlarmCues" Type="System.String" Scope="User">
       <Value Profile="(Default)">40R|20R|20R;1L OR 20L;1R</Value>
@@ -54,7 +54,7 @@
       <Value Profile="(Default)">00:30</Value>
     </Setting>
     <Setting Name="MaxVolume" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">5</Value>
+      <Value Profile="(Default)">4</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -172,6 +172,9 @@ namespace ZeoScope
                 this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2;
                 this.freqScopePanel.MaxValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MaxVolume + 2000;
                 this.freqScopePanel.MinValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MinVolume - 200;
+
+                this.stageScopePanel.MaxValueDisplay[this.stageScopePanel.NumberOfChannels - 1] = SoundAlarm.MaxVolume + 2000;
+                this.stageScopePanel.MinValueDisplay[this.stageScopePanel.NumberOfChannels - 1] = SoundAlarm.MinVolume - 200;
             }
             else
             {
@@ -543,6 +546,9 @@ namespace ZeoScope
                 this.freqScopePanel.NumberOfChannels = ZeoMessage.FrequencyBinsLength + 2;
                 this.freqScopePanel.MaxValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MaxVolume + 2000;
                 this.freqScopePanel.MinValueDisplay[this.freqScopePanel.NumberOfChannels - 1] = SoundAlarm.MinVolume - 200;
+
+                this.stageScopePanel.MaxValueDisplay[this.stageScopePanel.NumberOfChannels - 1] = SoundAlarm.MaxVolume + 2000;
+                this.stageScopePanel.MinValueDisplay[this.stageScopePanel.NumberOfChannels - 1] = SoundAlarm.MinVolume - 200;
             }
             else
             {

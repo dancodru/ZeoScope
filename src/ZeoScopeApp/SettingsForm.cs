@@ -26,6 +26,19 @@
         public SettingsForm()
         {
             this.InitializeComponent();
+
+            this.LoadSettings();
+
+            this.errorProviders = new ErrorProvider[8];
+            for (int i = 0; i < this.errorProviders.Length; i++)
+            {
+                this.errorProviders[i] = new ErrorProvider();
+                this.errorProviders[i].BlinkStyle = ErrorBlinkStyle.NeverBlink;
+            }
+        }
+
+        private void LoadSettings()
+        {
             this.lucidAlarmGroupBox.Enabled = ZeoSettings.Default.AlarmEnabled;
             this.enableAlarmCheckBox.Checked = ZeoSettings.Default.AlarmEnabled;
 
@@ -43,13 +56,6 @@
 
             this.SetToolTips();
             this.LoadAlarmCues();
-
-            this.errorProviders = new ErrorProvider[8];
-            for (int i = 0; i < this.errorProviders.Length; i++)
-            {
-                this.errorProviders[i] = new ErrorProvider();
-                this.errorProviders[i].BlinkStyle = ErrorBlinkStyle.NeverBlink;
-            }
         }
 
         private void SetToolTips()
@@ -160,6 +166,8 @@
 
                     this.alarmPreviewStarted = true;
                     this.alarmPreviewButton.Text = "Stop";
+                    this.soundAlarm = new SoundAlarm(this.mp3FileName, this.fadeInTextBox.Text, this.fadeOutTextBox.Text, this.durationTextBox.Text, "", "", "", "1A");
+                    this.soundAlarm.AlarmStarted = true;
                     this.alarmThread = new System.Threading.Timer(new TimerCallback(this.RunAlarm), null, 0, 1000);
                 }
             }
@@ -180,12 +188,6 @@
 
         private void RunAlarm(object obj)
         {
-            if (this.soundAlarm == null)
-            {
-                this.soundAlarm = new SoundAlarm(this.mp3FileName, this.fadeInTextBox.Text, this.fadeOutTextBox.Text, this.durationTextBox.Text, "", "", "", "1A");
-                this.soundAlarm.AlarmStarted = true;
-            }
-
             this.soundAlarm.ProcessZeoMessage(new ZeoMessage());
 
             if (this.soundAlarm.AlarmStarted == false)
@@ -219,6 +221,12 @@
 
                 this.Close();
             }
+        }
+
+        private void RestoreButton_Click(object sender, EventArgs e)
+        {
+            ZeoSettings.Default.Reset();
+            this.LoadSettings();
         }
 
         private bool ValidateFields()

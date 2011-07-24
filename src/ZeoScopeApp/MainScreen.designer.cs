@@ -158,7 +158,7 @@
             this.startToolStripButton.Name = "startToolStripButton";
             this.startToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.startToolStripButton.Text = "Start Recording";
-            this.startToolStripButton.ToolTipText = "Start Recording (Space)";
+            this.startToolStripButton.ToolTipText = "Start Recording";
             this.startToolStripButton.Click += new System.EventHandler(this.StartToolStripButton_Click);
             // 
             // stopToolStripButton
@@ -201,7 +201,7 @@
             this.openToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.openToolStripButton.Name = "openToolStripButton";
             this.openToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.openToolStripButton.Text = "Open Zeo File";
+            this.openToolStripButton.Text = "Open ZeoScope File";
             this.openToolStripButton.ToolTipText = "Open Zeo File";
             this.openToolStripButton.Click += new System.EventHandler(this.OpenToolStripButton_Click);
             // 
@@ -224,15 +224,15 @@
             this.fileNameToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
             this.fileNameToolStripComboBox.MaxDropDownItems = 20;
             this.fileNameToolStripComboBox.Name = "fileNameToolStripComboBox";
-            this.fileNameToolStripComboBox.Size = new System.Drawing.Size(75, 25);
+            this.fileNameToolStripComboBox.Size = new System.Drawing.Size(100, 25);
             this.fileNameToolStripComboBox.Text = "ZeoData";
-            this.fileNameToolStripComboBox.ToolTipText = "File Name";
+            this.fileNameToolStripComboBox.ToolTipText = "File Name (editable)";
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(76, 22);
-            this.toolStripLabel1.Text = "_<Time>.zeo";
+            this.toolStripLabel1.Size = new System.Drawing.Size(85, 22);
+            this.toolStripLabel1.Text = "_<Time>.zeo   ";
             // 
             // toolStripSeparator3
             // 
@@ -275,7 +275,7 @@
             this.settingsToolStripButton.Name = "settingsToolStripButton";
             this.settingsToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.settingsToolStripButton.Text = "Settings";
-            this.settingsToolStripButton.ToolTipText = "Settings";
+            this.settingsToolStripButton.ToolTipText = "Settings\r\nAlarm";
             this.settingsToolStripButton.Click += new System.EventHandler(this.SettingsToolStripButton_Click);
             // 
             // alarmStateToolStripLabel
