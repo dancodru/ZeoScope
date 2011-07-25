@@ -283,7 +283,8 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>cd $(OutDir)
+"C:\Program Files\7-Zip\7z.exe" d ZeoScope.0.9.1.0.zip *
+"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.1.0.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll Microsoft.DirectX.Direct3D.dll Microsoft.DirectX.Direct3DX.dll Microsoft.DirectX.dll</PostBuildEvent>
   </PropertyGroup>
 </Project>

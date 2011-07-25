@@ -377,12 +377,6 @@ namespace ZeoScope
                         this.StartToolStripButton_Click(this, null);
                         return;
                     }
-
-                    if (this.stopToolStripButton.Enabled == true)
-                    {
-                        this.StopToolStripButton_Click(this, null);
-                        return;
-                    }
                 }
             }
         }

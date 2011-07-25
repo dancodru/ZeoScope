@@ -1,7 +1,7 @@
 ZeoScope
 ========
 
-ZeoScope is a biofeedback application based on Zeo Raw Data Library http://blog.myzeo.com/zeo-raw-data-library-free-your-mind/
+ZeoScope is a biofeedback application based on [Zeo Raw Data Library][]
 
 Features
 ========
@@ -15,12 +15,13 @@ Features
 The following functionality is supported when using Bluetooth speakers/headsets:
 
 * Stop playing Sound Alarm by pressing **Play/Pause**, **Next Track**, **Previous Track** buttons
-* Start/Stop Sleep Data recording when pressing **Play/Pause** button
+* Start Sleep Data recording when pressing **Play/Pause** button
 
 Tested Bluetooth speakers/headsets:
 
 * [Satechi BT Speaker][]
-* [Motorola S305 Wireless Stereo Headphones][]
+* [Motorola S305 Bluetooth Headphones][]
+
 
 Feature list planned for near future:
 
@@ -30,13 +31,8 @@ Feature list planned for near future:
 Downloads
 =========
 
-You can download the executable at:
-
-* http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
-
-It requires DirectX Runtime that can be installed from:
-
-* http://www.microsoft.com/download/en/details.aspx?id=35
+* [ZeoScope Executable][]
+* [DirectX Runtime][]
 
 Screenshots
 ===========
@@ -58,5 +54,8 @@ Alarm Sound description
 
 [![](https://lh6.googleusercontent.com/-6ObYZaMK8m8/Tiu4ocdBDHI/AAAAAAAAABs/tuDajQHs4lU/s800/AlarmSound.jpg)]()
 
+[Zeo Raw Data Library]: http://blog.myzeo.com/zeo-raw-data-library-free-your-mind/
 [Satechi BT Speaker]: http://www.satechi.net/index.php/ipad-iphone/speakers-1/satechi-bt-speaker
-[Motorola S305 Wireless Stereo Headphones]: http://www.motorola.com/Consumers/US-EN/Consumer-Product-and-Services/Bluetooth-Headsets/MOTOROKR-S305-Wireless-Stereo-Headphones-US-EN
+[Motorola S305 Bluetooth Headphones]: http://www.motorola.com/Consumers/US-EN/Consumer-Product-and-Services/Bluetooth-Headsets/MOTOROKR-S305-Wireless-Stereo-Headphones-US-EN
+[ZeoScope Executable]: http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
+[DirectX Runtime]: http://www.microsoft.com/download/en/details.aspx?id=35
