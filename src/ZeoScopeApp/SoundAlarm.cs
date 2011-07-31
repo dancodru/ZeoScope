@@ -140,12 +140,12 @@
                     for (; i >= 0 && i > end; i--)
                     {
                         if (state.SleepStage == ZeoSleepStage.Sleep &&
-                            (this.sleepStages[i] != ZeoSleepStage.REM || this.sleepStages[i] != ZeoSleepStage.Light || this.sleepStages[i] != ZeoSleepStage.Deep))
+                            (this.sleepStages[i] != ZeoSleepStage.REM && this.sleepStages[i] != ZeoSleepStage.Light && this.sleepStages[i] != ZeoSleepStage.Deep))
                         {
                             startAlarm = false;
                             break;
                         }
-                        else if (this.sleepStages[i] != state.SleepStage)
+                        else if (state.SleepStage != ZeoSleepStage.Sleep && this.sleepStages[i] != state.SleepStage)
                         {
                             startAlarm = false;
                             break;

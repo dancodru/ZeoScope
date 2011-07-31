@@ -6,7 +6,7 @@ ZeoScope is a biofeedback application based on [Zeo Raw Data Library][]
 Features
 ========
 
-* **Lucid Dream Sound Alarm** including support of Bluetooth speakers/headsets
+* **Lucid Dream Sound Alarm**, including support of Bluetooth speakers/headsets
 * Recording Zeo full sleep sessions
 * Displaying Zeo saved sessions
 * Simultaneous display of EEG signal, Frequency bins and Sleep Stage graphs. These three graphs are synchronized between each other
@@ -32,7 +32,7 @@ Downloads
 =========
 
 * [ZeoScope Executable][]
-* [DirectX Runtime][]
+* [Latest DirectX Runtime][]
 
 Screenshots
 ===========
@@ -58,4 +58,4 @@ Alarm Sound description
 [Satechi BT Speaker]: http://www.satechi.net/index.php/ipad-iphone/speakers-1/satechi-bt-speaker
 [Motorola S305 Bluetooth Headphones]: http://www.motorola.com/Consumers/US-EN/Consumer-Product-and-Services/Bluetooth-Headsets/MOTOROKR-S305-Wireless-Stereo-Headphones-US-EN
 [ZeoScope Executable]: http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
-[DirectX Runtime]: http://www.microsoft.com/download/en/details.aspx?id=35
+[Latest DirectX Runtime]: http://www.microsoft.com/download/en/details.aspx?id=35
