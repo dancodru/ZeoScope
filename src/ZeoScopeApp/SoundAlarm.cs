@@ -237,8 +237,8 @@
                 this.audio.Volume = SoundAlarm.MinVolume;
                 this.AlarmStarted = false;
 
-                // Snooze the alarm for this.snoozeTime minutes
-                if (string.IsNullOrEmpty(this.snoozeTime) == false && TimeSpan.Parse(this.snoozeTime).TotalMinutes ==0)
+                // Snooze the alarm for snoozeTime minutes
+                if (string.IsNullOrEmpty(this.snoozeTime) == false && TimeSpan.Parse(this.snoozeTime).TotalMinutes != 0)
                 {
                     this.fromTime = DateTime.Now.Add(TimeSpan.Parse(this.snoozeTime)).ToString("HH:mm");
                     this.AlarmEnabled = false;
