@@ -554,11 +554,14 @@
 
             int len = this.CalculatePulseVerts();
 
-            this.device.BeginScene();
-            this.device.VertexFormat = CustomVertex.TransformedColored.Format;
-            for (int i = this.NumberOfChannels - 1; i >= 0; i--)
+            if (len > 0)
             {
-                this.device.DrawUserPrimitives(PrimitiveType.LineStrip, len - 1, this.scopeVerts[i]);
+                this.device.BeginScene();
+                this.device.VertexFormat = CustomVertex.TransformedColored.Format;
+                for (int i = this.NumberOfChannels - 1; i >= 0; i--)
+                {
+                    this.device.DrawUserPrimitives(PrimitiveType.LineStrip, len - 1, this.scopeVerts[i]);
+                }
             }
 
             this.device.EndScene();
