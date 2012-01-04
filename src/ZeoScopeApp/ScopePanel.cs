@@ -442,7 +442,7 @@
             int maxX = this.devicePanel.Width;
             int maxY = this.devicePanel.Height;
 
-            this.device.Clear(ClearFlags.Target, this.backgroundColor, 1f, 0);
+            this.device.Clear(ClearFlags.Target, this.backgroundColor, 0f, 0);
 
             CustomVertex.TransformedColored[] verts = new CustomVertex.TransformedColored[5];
             verts[0].Position = new Vector4(this.borderMargin, this.borderMargin, 0, 0);

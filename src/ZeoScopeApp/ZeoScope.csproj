@@ -252,6 +252,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="..\..\LICENSE">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ZeoSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>ZeoSettings.Designer.cs</LastGenOutput>
@@ -285,6 +288,6 @@
     </PreBuildEvent>
     <PostBuildEvent>cd $(OutDir)
 "C:\Program Files\7-Zip\7z.exe" d ZeoScope.0.9.1.0.zip *
-"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.1.0.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll Microsoft.DirectX.Direct3D.dll Microsoft.DirectX.Direct3DX.dll Microsoft.DirectX.dll</PostBuildEvent>
+"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.1.0.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll Microsoft.DirectX.Direct3D.dll Microsoft.DirectX.Direct3DX.dll Microsoft.DirectX.dll LICENSE</PostBuildEvent>
   </PropertyGroup>
 </Project>

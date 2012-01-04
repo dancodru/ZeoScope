@@ -116,7 +116,7 @@
         System.Drawing.Color.Green};
             this.eegScopePanel.HorizontalLinesCount = 1;
             this.eegScopePanel.LabelFormatStrings = new string[] {
-        "\t{0:0.000}mv"};
+        "\t{0:0.000}uV"};
             this.eegScopePanel.LabelSpacing = 90;
             this.eegScopePanel.Location = new System.Drawing.Point(0, 0);
             this.eegScopePanel.MaxValueDisplay = null;
