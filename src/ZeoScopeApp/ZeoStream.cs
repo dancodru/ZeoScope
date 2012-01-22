@@ -182,7 +182,8 @@ namespace ZeoScope
 
         private static string[] supportedVersions = new string[] {
             string.Empty, // old version (no version string)
-            "ZeoVersion: 00.09.0000.0000"
+            "ZeoVersion: 00.09.0000.0000",
+            "ZeoVersion: 00.09.0001.0000"
         };
 
         private string fileName;
@@ -576,19 +577,19 @@ namespace ZeoScope
 
             this.binFile.Read(bytes, 0, bytes.Length);
 
-            string fileVersion = ASCIIEncoding.ASCII.GetString(bytes);
-            if (fileVersion.StartsWith(ZeoStream.versionHeader) == false)
+            string fileVersionString = ASCIIEncoding.ASCII.GetString(bytes);
+            if (fileVersionString.StartsWith(ZeoStream.versionHeader) == false)
             {
                 // Old file types
-                fileVersion = string.Empty;
+                fileVersionString = string.Empty;
             }
 
-            if (currentVersionString != fileVersion)
+            if (currentVersionString != fileVersionString)
             {
                 bool match = false;
                 foreach (string ver in ZeoStream.supportedVersions)
                 {
-                    if (ver == fileVersion)
+                    if (ver == fileVersionString)
                     {
                         match = true;
                         break;
@@ -599,7 +600,7 @@ namespace ZeoScope
                 {
                     this.Dispose();
                     throw new ZeoException("Unsupported File Version: {0}\r\nCurrent Version: {1:00}.{2:00}.{3:0000}.{4:0000}",
-                        fileVersion,
+                        fileVersionString,
                         version.Major, version.Minor, version.Build, version.Revision);
                 }
             }

@@ -7,11 +7,26 @@
     using System.IO;
     using System.Windows.Forms;
 
-    using Microsoft.DirectX;
-    using Microsoft.DirectX.Direct3D;
-
-    using D3DFont = Microsoft.DirectX.Direct3D.Font;
     using WinFont = System.Drawing.Font;
+
+    using SlimDX;
+    using SlimDX.Direct3D9;
+    using DXFont = SlimDX.Direct3D9.Font;
+
+    internal struct VectorColored
+    {
+        public Vector4 Position;
+        public int Color;
+
+        public VectorColored(float x, float y, Color color)
+        {
+            this.Position = new Vector4(x, y, 0f, 1f);
+            this.Color = color.ToArgb();
+        }
+
+        public const VertexFormat Format = VertexFormat.PositionRhw | VertexFormat.Diffuse;
+        public const int StrideSize = 20;
+    }
 
     internal class ScopePanel : Panel
     {
@@ -25,12 +40,10 @@
         private ToolTip toolTip;
 
         private Device device;
-        private PresentParameters presentParams;
-        private bool deviceLost = false;
-        private CustomVertex.TransformedColored[][] scopeVerts;
+        private VectorColored[][] scopeVerts;
         private int scopeVertsLen;
-        private D3DFont titleFont;
-        private D3DFont labelFont;
+        private DXFont titleFont;
+        private DXFont labelFont;
 
         private Color lineColor = Color.FromArgb(140, 130, 105);
         private Color backgroundColor = Color.FromArgb(30, 80, 120);
@@ -260,14 +273,12 @@
         {
             base.OnResize(eventargs);
             this.scopeVerts = null;
-            this.deviceLost = true;
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
             this.scopeVerts = null;
-            this.deviceLost = true;
         }
 
         protected override void Dispose(bool disposing)
@@ -290,6 +301,7 @@
 
                 if (this.device != null)
                 {
+                    this.device.Direct3D.Dispose();
                     this.device.Dispose();
                     this.device = null;
                 }
@@ -306,12 +318,6 @@
             {
                 this.Focus();
             }
-        }
-
-        private void Device_DeviceLost(object sender, EventArgs e)
-        {
-            this.scopeVerts = null;
-            this.deviceLost = true;
         }
 
         private void ScrollBar_ValueChanged(object sender, EventArgs e)
@@ -364,76 +370,50 @@
         #region Rendering
         private void CreateDevice()
         {
-            int adapterOrdinal = Manager.Adapters.Default.Adapter;
-
-            Caps caps = Manager.GetDeviceCaps(adapterOrdinal, DeviceType.Hardware);
-            CreateFlags createFlags;
-
-            if (caps.DeviceCaps.SupportsHardwareTransformAndLight)
+            this.device = new Device(new Direct3D(), 0, DeviceType.Hardware, this.devicePanel.Handle, CreateFlags.HardwareVertexProcessing, new PresentParameters()
             {
-                createFlags = CreateFlags.HardwareVertexProcessing;
-            }
-            else
-            {
-                createFlags = CreateFlags.SoftwareVertexProcessing;
-            }
+                SwapEffect = SwapEffect.Discard,
+                Windowed = true,
+                BackBufferWidth = this.devicePanel.ClientSize.Width,
+                BackBufferHeight = this.devicePanel.ClientSize.Height
+            });
 
-            if (caps.DeviceCaps.SupportsPureDevice && createFlags == CreateFlags.HardwareVertexProcessing)
-            {
-                createFlags |= CreateFlags.PureDevice;
-            }
+            this.device.VertexFormat = VectorColored.Format;
 
-            this.presentParams = new PresentParameters();
-            this.presentParams.Windowed = true;
-            this.presentParams.SwapEffect = SwapEffect.Discard;
-
-            this.device = new Device(adapterOrdinal, DeviceType.Hardware, this.devicePanel, createFlags, this.presentParams);
-
-            this.device.DeviceLost += new EventHandler(this.Device_DeviceLost);
-
-            this.titleFont = new D3DFont(this.device, new WinFont("Courier New", 14, FontStyle.Bold));
-            this.labelFont = new D3DFont(this.device, new WinFont("Courier New", 10, FontStyle.Bold));
+            this.titleFont = new DXFont(this.device, new WinFont("Courier New", 14, FontStyle.Bold));
+            this.labelFont = new DXFont(this.device, new WinFont("Courier New", 10, FontStyle.Bold));
         }
 
         public void RenderDevice()
         {
-            if (this.deviceLost == true)
+            try
             {
-                int r;
-                this.device.CheckCooperativeLevel(out r);
-                ResultCode result = (ResultCode)r;
-
-                if (result == ResultCode.DeviceNotReset)
+                if (this.device == null || this.device.Viewport == null)
                 {
-                    try
-                    {
-                        this.device.Reset(this.presentParams);
-                        this.device.CheckCooperativeLevel(out r);
-                        result = (ResultCode)r;
-                    }
-                    catch (DeviceLostException)
-                    {
-                    }
-                    catch (OutOfVideoMemoryException)
-                    {
-                    }
-                }
-
-                if (result == ResultCode.Success)
-                {
-                    this.deviceLost = false;
+                    return;
                 }
             }
-
-            if (this.deviceLost == false)
+            catch (NullReferenceException)
             {
-                if (this.Width != 0 && this.Height != 0)
-                {
-                    this.DrawBackground();
-                    this.DrawScope();
-                    this.DrawText();
-                    this.device.Present();
-                }
+                return;
+            }
+
+            if (this.device.Viewport.Width != this.devicePanel.Width || this.device.Viewport.Height != this.devicePanel.Height)
+            {
+                this.titleFont.Dispose();
+                this.labelFont.Dispose();
+                this.device.Direct3D.Dispose();
+                this.device.Dispose();
+
+                this.CreateDevice();
+            }
+
+            if (this.Width != 0 && this.Height != 0)
+            {
+                this.DrawBackground();
+                this.DrawScope();
+                this.DrawText();
+                this.device.Present();
             }
         }
 
@@ -444,26 +424,20 @@
 
             this.device.Clear(ClearFlags.Target, this.backgroundColor, 0f, 0);
 
-            CustomVertex.TransformedColored[] verts = new CustomVertex.TransformedColored[5];
-            verts[0].Position = new Vector4(this.borderMargin, this.borderMargin, 0, 0);
-            verts[0].Color = Color.Black.ToArgb();
-            verts[1].Position = new Vector4(maxX - this.borderMargin, this.borderMargin, 0, 0);
-            verts[1].Color = Color.Black.ToArgb();
-            verts[2].Position = new Vector4(maxX - this.borderMargin, maxY - this.borderMargin, 0, 0);
-            verts[2].Color = Color.Black.ToArgb();
-            verts[3].Position = new Vector4(this.borderMargin, maxY - this.borderMargin, 0, 0);
-            verts[3].Color = Color.Black.ToArgb();
-            verts[4].Position = new Vector4(this.borderMargin, this.borderMargin, 0, 0);
-            verts[4].Color = Color.Black.ToArgb();
+            VectorColored[] verts = new VectorColored[5];
+            verts[0] = new VectorColored(this.borderMargin, this.borderMargin, Color.Black);
+            verts[1] = new VectorColored(maxX - this.borderMargin, this.borderMargin, Color.Black);
+            verts[2] = new VectorColored(maxX - this.borderMargin, maxY - this.borderMargin, Color.Black);
+            verts[3] = new VectorColored(this.borderMargin, maxY - this.borderMargin, Color.Black);
+            verts[4] = new VectorColored(this.borderMargin, this.borderMargin, Color.Black);
 
             this.device.BeginScene();
-            this.device.VertexFormat = CustomVertex.TransformedColored.Format;
             this.device.DrawUserPrimitives(PrimitiveType.TriangleStrip, 3, verts);
             this.device.EndScene();
 
             int borderVertsLen = maxX - this.borderMargin - this.borderMargin + maxY - this.borderMargin - this.borderMargin;
 
-            verts = new CustomVertex.TransformedColored[borderVertsLen];
+            verts = new VectorColored[borderVertsLen];
 
             int xlen = (maxX - this.borderMargin - this.borderMargin) / 2;
             int ylen = (maxY - this.borderMargin - this.borderMargin) / 2;
@@ -474,30 +448,25 @@
 
             for (int i = 0; i < xlen; i++)
             {
-                verts[i].Position = new Vector4(this.borderMargin + (i * 2), this.borderMargin, 0, 0);
-                verts[i].Color = this.lineColor.ToArgb();
+                verts[i] = new VectorColored(this.borderMargin + (i * 2), this.borderMargin, this.lineColor);
             }
 
             for (int i = 0; i < xlen; i++)
             {
-                verts[i + xlen].Position = new Vector4(this.borderMargin + (i * 2), maxY - this.borderMargin - 1, 0, 0);
-                verts[i + xlen].Color = this.lineColor.ToArgb();
+                verts[i + xlen] = new VectorColored(this.borderMargin + (i * 2), maxY - this.borderMargin - 1, this.lineColor);
             }
 
             for (int i = 0; i < ylen; i++)
             {
-                verts[i + (2 * xlen)].Position = new Vector4(this.borderMargin, this.borderMargin + (i * 2), 0, 0);
-                verts[i + (2 * xlen)].Color = this.lineColor.ToArgb();
+                verts[i + (2 * xlen)] = new VectorColored(this.borderMargin, this.borderMargin + (i * 2), this.lineColor);
             }
 
             for (int i = 0; i < ylen; i++)
             {
-                verts[i + (2 * xlen) + ylen].Position = new Vector4(maxX - this.borderMargin, this.borderMargin + (i * 2), 0, 0);
-                verts[i + (2 * xlen) + ylen].Color = this.lineColor.ToArgb();
+                verts[i + (2 * xlen) + ylen] = new VectorColored(maxX - this.borderMargin, this.borderMargin + (i * 2), this.lineColor);
             }
 
             this.device.BeginScene();
-            this.device.VertexFormat = CustomVertex.TransformedColored.Format;
             this.device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
             this.device.EndScene();
 
@@ -507,23 +476,22 @@
             int lineSpace = (maxY - this.borderMargin - this.borderMargin) / (this.HorizontalLinesCount + 1);
             for (int j = 1; j <= this.HorizontalLinesCount; j++)
             {
-                verts = new CustomVertex.TransformedColored[horisontalGridLineLendth];
+                verts = new VectorColored[horisontalGridLineLendth];
                 for (int i = 0; i < xlen; i++)
                 {
-                    verts[i].Position = new Vector4(this.borderMargin + (i * 2), (lineSpace * j) + this.borderMargin, 0, 0);
                     if (this.HorizontalLinesCount > 1 && this.HorizontalLinesCount % 2 == 1 &&
                         j == (this.HorizontalLinesCount + 1) / 2)
                     {
+                        verts[i] = new VectorColored(this.borderMargin + (i * 2), (lineSpace * j) + this.borderMargin, Color.White);
                         verts[i].Color = Color.White.ToArgb();
                     }
                     else
                     {
-                        verts[i].Color = this.lineColor.ToArgb();
+                        verts[i] = new VectorColored(this.borderMargin + (i * 2), (lineSpace * j) + this.borderMargin, this.lineColor);
                     }
                 }
 
                 this.device.BeginScene();
-                this.device.VertexFormat = CustomVertex.TransformedColored.Format;
                 this.device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
                 this.device.EndScene();
             }
@@ -545,10 +513,10 @@
                 this.scrollBar.LargeChange = (int)(this.scopeVertsLen / this.SamplesPerSecond);
                 this.scrollBar.SmallChange = (this.scrollBar.LargeChange > 10) ? this.scrollBar.LargeChange / 10 : 1;
 
-                this.scopeVerts = new CustomVertex.TransformedColored[this.NumberOfChannels][];
+                this.scopeVerts = new VectorColored[this.NumberOfChannels][];
                 for (int i = 0; i < this.NumberOfChannels; i++)
                 {
-                    this.scopeVerts[i] = new CustomVertex.TransformedColored[this.scopeVertsLen];
+                    this.scopeVerts[i] = new VectorColored[this.scopeVertsLen];
                 }
             }
 
@@ -557,7 +525,6 @@
             if (len > 0)
             {
                 this.device.BeginScene();
-                this.device.VertexFormat = CustomVertex.TransformedColored.Format;
                 for (int i = this.NumberOfChannels - 1; i >= 0; i--)
                 {
                     this.device.DrawUserPrimitives(PrimitiveType.LineStrip, len - 1, this.scopeVerts[i]);
@@ -571,15 +538,13 @@
             int ylen = (maxY - cursorMargin - cursorMargin) / 2;
             if (ylen > 0)
             {
-                CustomVertex.TransformedColored[] verts = new CustomVertex.TransformedColored[ylen];
+                VectorColored[] verts = new VectorColored[ylen];
                 for (int i = 0; i < ylen; i++)
                 {
-                    verts[i].Position = new Vector4(this.ScopeX + this.borderMargin, cursorMargin + 4 + (i * 2), 0, 0);
-                    verts[i].Color = this.lineColor.ToArgb();
+                    verts[i] = new VectorColored(this.ScopeX + this.borderMargin, cursorMargin + 4 + (i * 2), this.lineColor);
                 }
 
                 this.device.BeginScene();
-                this.device.VertexFormat = CustomVertex.TransformedColored.Format;
                 this.device.DrawUserPrimitives(PrimitiveType.PointList, verts.Length, verts);
                 this.device.EndScene();
             }
@@ -614,8 +579,7 @@
                     if (this.ScopeData[i] != null)
                     {
                         y = zero - (mod * ((this.ScopeData[i].Values[k] - scopeZero[k]) / scopeMod[k]));
-                        this.scopeVerts[k][i].Position = new Vector4(x, y, 0, 0);
-                        this.scopeVerts[k][i].Color = this.GraphColors[k].ToArgb();
+                        this.scopeVerts[k][i] = new VectorColored(x, y, this.GraphColors[k]);
                     }
                     else
                     {
@@ -636,7 +600,7 @@
             this.device.BeginScene();
 
             // Draw Title
-            this.titleFont.DrawText(null, this.Title, textX, textY, Color.Gray);
+            this.titleFont.DrawString(null, this.Title, textX, textY, Color.Gray);
 
             if (this.ScopeData != null && this.ScopeData.Length > 0)
             {
@@ -645,13 +609,13 @@
                     this.ScopeX = this.ScopeData.Length - 1;
                 }
 
-                int textLength = this.titleFont.MeasureString(null, this.Title, DrawTextFormat.ExpandTabs, Color.Gray).Width;
+                int textLength = this.titleFont.MeasureString(null, this.Title, DrawTextFormat.ExpandTabs).Width;
                 textX += textLength + 20;
 
                 // Draw time label
                 if (string.IsNullOrEmpty(this.TimeString) == false)
                 {
-                    this.labelFont.DrawText(null, this.TimeString, textX, textY, Color.Gray);
+                    this.labelFont.DrawString(null, this.TimeString, textX, textY, Color.Gray);
                     textX += 90;
                 }
 
@@ -664,7 +628,7 @@
                             textX += 70;
                         }
 
-                        this.labelFont.DrawText(null, string.Format(this.LabelFormatStrings[i], this.ScopeData[this.ScopeX].Values[i]),
+                        this.labelFont.DrawString(null, string.Format(this.LabelFormatStrings[i], this.ScopeData[this.ScopeX].Values[i]),
                             textX, textY, this.GraphColors[i]);
 
                         textX += this.LabelSpacing;

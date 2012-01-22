@@ -25,9 +25,9 @@ namespace ZeoScope
     using System.Threading;
     using System.Windows.Forms;
 
-    using Microsoft.DirectX.Direct3D;
+    using SlimDX.Windows;
 
-    internal partial class MainScreen : Form
+    internal partial class MainScreen : RenderForm
     {
         #region Privates
         private readonly string alarmOnString = "Alarm: ON";
@@ -94,9 +94,12 @@ namespace ZeoScope
                 }
             }
 
-            this.eegScopePanel.RenderDevice();
-            this.freqScopePanel.RenderDevice();
-            this.stageScopePanel.RenderDevice();
+            if (this.eegScopePanel != null)
+            {
+                this.eegScopePanel.RenderDevice();
+                this.freqScopePanel.RenderDevice();
+                this.stageScopePanel.RenderDevice();
+            }
 
             Thread.Sleep(15);
         }
@@ -134,11 +137,20 @@ namespace ZeoScope
         protected override void OnResize(EventArgs e)
         {
             // TODO: Fix this workaround
-            this.eegScopePanel.Height++;
-            this.eegScopePanel.Height--;
+            if (this.eegScopePanel != null)
+            {
+                this.eegScopePanel.Height++;
+                this.eegScopePanel.Height--;
+            }
 
             base.OnResize(e);
             this.Render();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Initialize();
         }
 
         private void MainScreen_Shown(object sender, EventArgs e)
@@ -397,7 +409,7 @@ namespace ZeoScope
         #endregion
 
         #region Methods
-        public void InitializeGraphics()
+        public void Initialize()
         {
             this.MinimumSize = new Size((int)(ZeoStream.SamplesPerSec * 2), 100);
 
@@ -517,9 +529,6 @@ namespace ZeoScope
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
 
-            // TODO: is there a better way to treat OutOfVideoMemoryException
-            OutOfVideoMemoryException.IgnoreExceptions();
-            
             Application.EnableVisualStyles();
 
             if (ZeoSettings.Default.LicenseAgree == false)
@@ -551,13 +560,13 @@ namespace ZeoScope
                     }
                 }
 
-                frm.InitializeGraphics();
-                frm.Show();
-                frm.Render();
+                //frm.InitializeGraphics();
+                //frm.Show();
+                //frm.Render();
 
                 // TODO: Fix this workaround
-                frm.eegScopePanel.Height++;
-                frm.eegScopePanel.Height--;
+                //frm.eegScopePanel.Height++;
+                //frm.eegScopePanel.Height--;
 
                 if (args.Length > 0)
                 {
@@ -568,15 +577,13 @@ namespace ZeoScope
                 }
 
                 // While the form is still valid, render and process messages
-                while (frm.Created)
-                {
-                    if (frm.WindowState != FormWindowState.Minimized)
+                MessagePump.Run(frm, () =>
                     {
-                        frm.Render();
-                    }
-
-                    Application.DoEvents();
-                }
+                        if (frm.WindowState != FormWindowState.Minimized)
+                        {
+                            frm.Render();
+                        }
+                    });
             }
         }
 

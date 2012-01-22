@@ -151,30 +151,14 @@
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.DirectX">
-      <Name>Microsoft.DirectX</Name>
-      <HintPath>%WINDIR%\Microsoft.NET\Managed DirectX\v9.05.132\Microsoft.DirectX.dll</HintPath>
-      <AssemblyFolderKey>hklm\current managed directx 9.3</AssemblyFolderKey>
-    </Reference>
     <Reference Include="Microsoft.DirectX.AudioVideoPlayback">
       <Name>Microsoft.DirectX.AudioVideoPlayback</Name>
       <HintPath>%WINDIR%\Microsoft.NET\Managed DirectX\v9.05.132\Microsoft.DirectX.AudioVideoPlayback.dll</HintPath>
       <AssemblyFolderKey>hklm\current managed directx 9.3</AssemblyFolderKey>
     </Reference>
-    <Reference Include="Microsoft.DirectX.Direct3D">
-      <Name>Microsoft.DirectX.Direct3D</Name>
-      <HintPath>%WINDIR%\Microsoft.NET\Managed DirectX\v9.05.132\Microsoft.DirectX.Direct3D.dll</HintPath>
-      <AssemblyFolderKey>hklm\current managed directx 9.3</AssemblyFolderKey>
-    </Reference>
-    <Reference Include="Microsoft.DirectX.Direct3DX">
-      <Name>Microsoft.DirectX.Direct3DX</Name>
-      <HintPath>%WINDIR%\Microsoft.NET\Managed DirectX\v9.05.132\Microsoft.DirectX.Direct3DX.dll</HintPath>
-      <AssemblyFolderKey>hklm\current managed directx 9.3</AssemblyFolderKey>
-    </Reference>
-    <Reference Include="SlimDX, Version=2.0.11.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+    <Reference Include="SlimDX, Version=2.0.12.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\SlimDX SDK (March 2011)\Bin\net20\x86\SlimDX.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>C:\Program Files (x86)\SlimDX SDK (September 2011)\Bin\net20\x86\SlimDX.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
@@ -287,7 +271,7 @@
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>cd $(OutDir)
-"C:\Program Files\7-Zip\7z.exe" d ZeoScope.0.9.1.0.zip *
-"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.1.0.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll Microsoft.DirectX.Direct3D.dll Microsoft.DirectX.Direct3DX.dll Microsoft.DirectX.dll LICENSE</PostBuildEvent>
+"C:\Program Files\7-Zip\7z.exe" d ZeoScope.0.9.5.0.zip *
+"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.5.0.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll LICENSE</PostBuildEvent>
   </PropertyGroup>
 </Project>
