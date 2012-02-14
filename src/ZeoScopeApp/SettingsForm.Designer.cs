@@ -20,6 +20,18 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Button alarmPreviewButton;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button okButton;
+        private System.Windows.Forms.Button cancelButton;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox snoozeTextBox;
+        private System.Windows.Forms.ComboBox maxVolumeComboBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button restoreButton;
 
         /// <summary>
         /// Required designer variable.
@@ -430,18 +442,5 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button okButton;
-        private System.Windows.Forms.Button cancelButton;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox snoozeTextBox;
-        private System.Windows.Forms.ComboBox maxVolumeComboBox;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Button restoreButton;
     }
 }

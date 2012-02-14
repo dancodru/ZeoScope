@@ -28,6 +28,14 @@
         private SaveFileDialog saveFileDialog;
         private ToolStripSeparator toolStripSeparator4;
         private ToolStripButton settingsToolStripButton;
+        private ToolStripLabel alarmStateToolStripLabel;
+        private ContextMenuStrip contextMenuStrip;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem toolStripMenuItem2;
+        private ToolStripMenuItem toolStripMenuItem3;
+        private ToolStripMenuItem toolStripMenuItem4;
+        private ToolStripMenuItem toolStripMenuItem5;
+        private ToolStripMenuItem toolStripMenuItem6;
 
         /// <summary>
         /// Required designer variable.
@@ -429,14 +437,5 @@
         }
 
         #endregion
-
-        private ToolStripLabel alarmStateToolStripLabel;
-        private ContextMenuStrip contextMenuStrip;
-        private ToolStripMenuItem toolStripMenuItem1;
-        private ToolStripMenuItem toolStripMenuItem2;
-        private ToolStripMenuItem toolStripMenuItem3;
-        private ToolStripMenuItem toolStripMenuItem4;
-        private ToolStripMenuItem toolStripMenuItem5;
-        private ToolStripMenuItem toolStripMenuItem6;
     }
 }

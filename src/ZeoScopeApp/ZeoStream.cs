@@ -1,16 +1,13 @@
-//Copyright 2011 dancodru
-
-//Licensed under the Apache License, Version 2.0 (the "License");
-//You may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
- 
-//   http://www.apache.org/licenses/LICENSE-2.0
-
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
+// Copyright 2011 dancodru
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 namespace ZeoScope
 {
@@ -180,7 +177,8 @@ namespace ZeoScope
         private static string versionHeader = "ZeoVersion";
         private static string versionFormat = versionHeader + ": {0:00}.{1:00}.{2:0000}.{3:0000}";
 
-        private static string[] supportedVersions = new string[] {
+        private static string[] supportedVersions = new string[] 
+        {
             string.Empty, // old version (no version string)
             "ZeoVersion: 00.09.0000.0000",
             "ZeoVersion: 00.09.0001.0000"
@@ -651,7 +649,6 @@ namespace ZeoScope
                         }
                     }
 
-
                     header = this.ReadByte();
                 }
 
@@ -822,6 +819,7 @@ namespace ZeoScope
                             this.WriteInt32(zeoMessage.SoundAlarmVolume);
                             break;
                         }
+
                     case Z9DataType.SoundAlarmEnabled:
                         {
                             this.binFile.WriteByte(1);
@@ -940,13 +938,14 @@ namespace ZeoScope
         {
             // 50Hz Filter based on http://blog.myzeo.com/zeo-raw-data-library-free-your-mind/
             // Convolution math based on http://www.phys.uu.nl/~haque/computing/WPark_recipes_in_python.html
-            float[] filter = { 
+            float[] filter = 
+            { 
                 0.0032f, 0.0063f, -0.0088f, -0.0000f, 0.0100f, -0.0082f, -0.0047f, 0.0132f, -0.0054f, -0.0108f, 0.0151f, 0.0000f, 
                 -0.0177f, 0.0147f, 0.0087f, -0.0248f, 0.0105f, 0.0215f, -0.0315f, -0.0000f, 0.0411f, -0.0369f, -0.0241f, 0.0790f, 
                 -0.0404f, -0.1123f, 0.2939f, 0.6250f, 0.2939f, -0.1123f, -0.0404f, 0.0790f, -0.0241f, -0.0369f, 0.0411f, -0.0000f, 
                 -0.0315f, 0.0215f, 0.0105f, -0.0248f, 0.0087f, 0.0147f, -0.0177f, 0.0000f, 0.0151f, -0.0108f, -0.0054f, 0.0132f, 
                 -0.0047f, -0.0082f, 0.0100f                             
-                             };
+            };
 
             int filterLen = filter.Length;
             int len = signal.Length;

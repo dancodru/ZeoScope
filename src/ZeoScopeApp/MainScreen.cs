@@ -1,16 +1,13 @@
-//Copyright 2011 dancodru
-
-//Licensed under the Apache License, Version 2.0 (the "License");
-//You may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
-
-//   http://www.apache.org/licenses/LICENSE-2.0
-
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
+// Copyright 2011 dancodru
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 namespace ZeoScope
 {
@@ -150,7 +147,7 @@ namespace ZeoScope
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            Initialize();
+            this.Initialize();
         }
 
         private void MainScreen_Shown(object sender, EventArgs e)
@@ -472,7 +469,7 @@ namespace ZeoScope
         private void InitBluetoothSpeaker()
         {
             SlimDX.RawInput.Device.RegisterDevice(SlimDX.Multimedia.UsagePage.Consumer, SlimDX.Multimedia.UsageId.TelephonyPhone, SlimDX.RawInput.DeviceFlags.InputSink, this.Handle);
-            SlimDX.RawInput.Device.RawInput += new EventHandler<SlimDX.RawInput.RawInputEventArgs>(BluetoothSpeaker_RawInput);
+            SlimDX.RawInput.Device.RawInput += new EventHandler<SlimDX.RawInput.RawInputEventArgs>(this.BluetoothSpeaker_RawInput);
         }
 
         private void ComPortsComboBoxItemsAdd(object obj)
@@ -560,14 +557,6 @@ namespace ZeoScope
                     }
                 }
 
-                //frm.InitializeGraphics();
-                //frm.Show();
-                //frm.Render();
-
-                // TODO: Fix this workaround
-                //frm.eegScopePanel.Height++;
-                //frm.eegScopePanel.Height--;
-
                 if (args.Length > 0)
                 {
                     if (File.Exists(args[0]))
@@ -582,6 +571,7 @@ namespace ZeoScope
                         if (frm.WindowState != FormWindowState.Minimized)
                         {
                             frm.Render();
+                            Thread.Sleep(10);
                         }
                     });
             }

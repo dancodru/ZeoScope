@@ -1,16 +1,13 @@
-﻿//Copyright 2011 dancodru
-
-//Licensed under the Apache License, Version 2.0 (the "License");
-//You may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
-
-//   http://www.apache.org/licenses/LICENSE-2.0
-
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
+﻿// Copyright 2011 dancodru
+// Licensed under the Apache License, Version 2.0 (the "License");
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 namespace ZeoScope
 {
@@ -33,9 +30,6 @@ namespace ZeoScope
     internal class SoundAlarm : IDisposable
     {
         public static readonly int[] Volumes = { -4000, -2500, -1200, -600, 0 };  // 0 - (-10000) range
-
-        public static int MaxVolume { get; private set; } // max volume: 0
-        public static int MinVolume { get; private set; } // min volume: -10000
 
         private static string regexCue = @"((?<cue>(\d{1,3}[ARLDSU];?)+)(?:\s+OR\s+)?)+";
         private static string regexState = @"((?<state>\d{1,3}[ARLDSU]);?)+";
@@ -80,6 +74,10 @@ namespace ZeoScope
             this.ParseAlarmCue(alarmCue);
         }
 
+        public static int MaxVolume { get; private set; } // max volume: 0
+
+        public static int MinVolume { get; private set; } // min volume: -10000
+
         public bool AlarmStarted { get; set; }
 
         public bool AlarmEnabled { get; private set; }
@@ -115,7 +113,7 @@ namespace ZeoScope
                 // Called from SettingsForm
                 // TODO: Improve the design here
                 this.StartAlarm();
-                return null; ;
+                return null;
             }
 
             if (this.AlarmStarted == true || this.audio.Playing == true)
