@@ -57,5 +57,5 @@ Alarm Sound description
 [Zeo Raw Data Library]: http://blog.myzeo.com/zeo-raw-data-library-free-your-mind/
 [Satechi BT Speaker]: http://www.satechi.net/index.php/ipad-iphone/speakers-1/satechi-bt-speaker
 [Motorola S305 Bluetooth Headphones]: http://www.motorola.com/Consumers/US-EN/Consumer-Product-and-Services/Bluetooth-Headsets/MOTOROKR-S305-Wireless-Stereo-Headphones-US-EN
-[ZeoScope Executable]: http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.1.0.zip
+[ZeoScope Executable]: http://github.com/downloads/dancodru/ZeoScope/ZeoScope.0.9.5.1.zip
 [Latest DirectX Runtime]: http://www.microsoft.com/download/en/details.aspx?id=35

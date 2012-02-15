@@ -272,7 +272,7 @@
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>cd $(OutDir)
-"C:\Program Files\7-Zip\7z.exe" d ZeoScope.0.9.5.0.zip *
-"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.5.0.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll LICENSE</PostBuildEvent>
+"C:\Program Files\7-Zip\7z.exe" d ZeoScope.0.9.5.1.zip *
+"C:\Program Files\7-Zip\7z.exe" a ZeoScope.0.9.5.1.zip $(TargetName).exe $(TargetName).pdb SlimDX.dll Microsoft.DirectX.AudioVideoPlayback.dll LICENSE</PostBuildEvent>
   </PropertyGroup>
 </Project>

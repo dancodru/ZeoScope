@@ -181,7 +181,8 @@ namespace ZeoScope
         {
             string.Empty, // old version (no version string)
             "ZeoVersion: 00.09.0000.0000",
-            "ZeoVersion: 00.09.0001.0000"
+            "ZeoVersion: 00.09.0001.0000",
+            "ZeoVersion: 00.09.0005.0000"
         };
 
         private string fileName;
